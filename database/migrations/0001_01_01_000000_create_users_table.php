@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id('id_user'); // Primary Key 
             $table->string('email')->unique();
             $table->string('password');
-            $table->string('role'); // Bisa diisi admin atau penumpang
+            $table->string('role'); // Bisa diisi admin atau user
             $table->timestamp('created_at')->nullable();
         });
     }
