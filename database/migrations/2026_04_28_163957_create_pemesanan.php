@@ -18,6 +18,8 @@ return new class extends Migration
             $table->date('tanggal_pemesanan');
             $table->integer('total_harga');
             $table->string('status_pembayaran');
+
+            $table->string('no_kursi');
         });
     }
 

@@ -6,16 +6,22 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Run the migrations.
+     */
     public function up(): void
     {
-        Schema::create('tiket', function (Blueprint $table) {
-            $table->id('id_tiket'); // Primary Key
-            $table->foreignId('id_pemesanan')->constrained('pemesanan', 'id_pemesanan'); // Foreign Key
+        Schema::create('jadwals', function (Blueprint $table) {
+            $table->id();
+            $table->timestamps();
         });
     }
 
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
-        Schema::dropIfExists('tiket');
+        Schema::dropIfExists('jadwals');
     }
 };
