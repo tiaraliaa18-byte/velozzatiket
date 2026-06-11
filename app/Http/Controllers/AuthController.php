@@ -65,7 +65,7 @@ class AuthController extends Controller
 
         // Mengecek apakah rolenya bernilai 'admin'
         if ($user->role === 'admin') {
-            return redirect()->intended('/admin/dashboard');
+            return redirect()->intended('/admin/jadwal');
         }
 
         // Jika lolos dari semua syarat di atas (role tidak dikenali), paksa ke dashboard standar

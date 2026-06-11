@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Velozza</title>
-      <link rel="stylesheet" href="{{ asset('css/login.css') }}">                                                                                                                                                                                                        <link rel="stylesheet" href="{{ asset('css/login.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/login.css') }}">
 </head>
 <body>
 
@@ -34,7 +34,7 @@
 
                 <div class="form-group">
                     <label for="email">Alamat Email</label>
-                    <input type="email" id="email" name="email" value="{{ old('email') }}" required placeholder="contoh: admin@velozza.com">
+                    <input type="email" id="email" name="email" value="admin@velozza.com" required placeholder="contoh: admin@velozza.com">
                 </div>
 
                 <div class="form-group">
@@ -42,7 +42,7 @@
                         <label for="password">Kata Sandi</label>
                         <a href="#" class="forgot-link">Lupa Sandi?</a>
                     </div>
-                    <input type="password" id="password" name="password" required placeholder="••••••••">
+                    <input type="password" id="password" name="password" value="admin123" required placeholder="••••••••">
                 </div>
 
                 <button type="submit" class="btn-submit">

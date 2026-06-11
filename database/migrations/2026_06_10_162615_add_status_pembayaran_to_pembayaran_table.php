@@ -6,19 +6,23 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Run the migrations.
+     */
     public function up(): void
     {
         Schema::table('pembayaran', function (Blueprint $table) {
-            $table->enum('status_pembayaran', ['menunggu', 'valid', 'ditolak'])
-                  ->default('menunggu')
-                  ->after('nama_rekening');
+            //
         });
     }
 
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
         Schema::table('pembayaran', function (Blueprint $table) {
-            $table->dropColumn('status_pembayaran');
+            //
         });
     }
 };

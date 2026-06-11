@@ -12,9 +12,14 @@
         <div class="w-64 bg-blue-900 text-white p-6 shadow-lg">
             <h1 class="text-2xl font-bold tracking-wider mb-8">VELOZZA</h1>
             <nav class="space-y-4">
-                <a href="#" class="block py-2.5 px-4 rounded bg-blue-800 font-semibold">📅 Kelola Jadwal</a>
-                <a href="#" class="block py-2.5 px-4 rounded hover:bg-blue-800 transition">🎟️ Data Tiket</a>
-                <a href="#" class="block py-2.5 px-4 rounded hover:bg-blue-800 transition text-red-300">🚪 Logout</a>
+                <a href="{{ url('/admin/jadwal') }}" class="block py-2.5 px-4 rounded bg-blue-800 font-semibold">📅 Kelola Jadwal</a>
+                <a href="{{ url('/admin/pembayaran') }}" class="block py-2.5 px-4 rounded hover:bg-blue-800 transition">🎟️ Data Tiket</a>
+                <form action="{{ route('logout') }}" method="POST">
+                    @csrf
+                    <button type="submit" class="w-full text-left block py-2.5 px-4 rounded hover:bg-blue-800 transition text-red-300 cursor-pointer">
+                        🚪 Logout
+                    </button>
+                </form>
             </nav>
         </div>
 
@@ -55,13 +60,26 @@
                                 <td class="p-4">{{ $j->waktu_berangkat }}</td>
                                 <td class="p-4 font-medium text-green-600">Rp {{ number_format($j->harga, 0, ',', '.') }}</td>
                                 <td class="p-4 text-center">
-                                    <form action="{{ url('/admin/jadwal/'.$j->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus jadwal ini?');" class="inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded text-xs font-medium transition cursor-pointer">
-                                            Hapus
+                                    <div class="flex items-center justify-center gap-2">
+                                        <button type="button"
+                                                class="openEditModalBtn bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1.5 rounded text-xs font-medium transition cursor-pointer shadow"
+                                                data-id="{{ $j->id }}"
+                                                data-nama="{{ $j->nama_kereta }}"
+                                                data-asal="{{ $j->stasiun_asal }}"
+                                                data-tujuan="{{ $j->stasiun_tujuan }}"
+                                                data-waktu="{{ date('Y-m-d\TH:i', strtotime($j->waktu_berangkat)) }}"
+                                                data-harga="{{ $j->harga }}">
+                                            Edit
                                         </button>
-                                    </form>
+
+                                        <form action="{{ url('/admin/jadwal/'.$j->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus jadwal ini?');" class="inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded text-xs font-medium transition cursor-pointer shadow">
+                                                Hapus
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                         @empty
@@ -86,20 +104,17 @@
             
             <form action="{{ url('/admin/jadwal') }}" method="POST" class="p-6 space-y-4">
                 @csrf
-
                 <div>
                     <label class="block text-gray-700 text-sm font-semibold mb-1">Nama Kereta Api:</label>
                     <input type="text" name="nama_kereta" placeholder="Contoh: Velozza Express" required 
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
-
                 <div>
                     <label class="block text-gray-700 text-sm font-semibold mb-1">Stasiun Asal:</label>
                     <select name="stasiun_asal" required class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none">
                         <option value="Bandung">Bandung (BD)</option>
                     </select>
                 </div>
-
                 <div>
                     <label class="block text-gray-700 text-sm font-semibold mb-1">Stasiun Tujuan:</label>
                     <select name="stasiun_tujuan" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -109,19 +124,16 @@
                         <option value="Malang">Malang (ML)</option>
                     </select>
                 </div>
-
                 <div>
                     <label class="block text-gray-700 text-sm font-semibold mb-1">Waktu Berangkat:</label>
                     <input type="datetime-local" name="waktu_berangkat" required 
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
-
                 <div>
                     <label class="block text-gray-700 text-sm font-semibold mb-1">Harga Tiket (Rp.300.000):</label>
                     <input type="number" name="harga" placeholder="Contoh: 150000" required 
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
-
                 <div class="flex justify-end space-x-2 pt-2 border-t border-gray-100">
                     <button type="button" id="cancelModalBtn" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium text-sm transition cursor-pointer">
                         Batal
