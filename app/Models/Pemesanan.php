@@ -6,7 +6,17 @@ use Illuminate\Database\Eloquent\Model;
 
 class Pemesanan extends Model
 {
-    // Relasi balik ke User, Penumpang, dan Jadwal
+    protected $table = 'pemesanan';
+    protected $primaryKey = 'id_pemesanan';
+
+    protected $fillable = [
+        'id_user',
+        'id_penumpang',
+        'id_jadwal',
+        'no_kursi',
+        'status_pemesanan',
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class, 'id_user', 'id_user');
@@ -22,10 +32,9 @@ class Pemesanan extends Model
         return $this->belongsTo(Jadwal::class, 'id_jadwal', 'id_jadwal');
     }
 
-    // Relasi ke Tiket dan Pembayaran (One-to-One)
     public function tiket()
     {
-            return $this->hasOne(Tiket::class, 'id_pemesanan', 'id_pemesanan');
+        return $this->hasOne(Tiket::class, 'id_pemesanan', 'id_pemesanan');
     }
 
     public function pembayaran()

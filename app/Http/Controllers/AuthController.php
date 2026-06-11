@@ -25,7 +25,7 @@ class AuthController extends Controller
      */
     public function login(Request $request)
     {
-        // 1. Validasi inputan form
+        // 1. Validasi inputan form login
         $credentials = $request->validate([
             'email' => 'required|email',
             'password' => 'required',
@@ -35,41 +35,44 @@ class AuthController extends Controller
             'password.required' => 'Kata sandi wajib diisi.',
         ]);
 
-        // 2. Coba lakukan proses login (Auth::attempt)
+        // 2. Coba lakukan proses otentikasi login ke database
         if (Auth::attempt($credentials)) {
-            // Jika sukses, amankan session user
+            // Jika sukses, amankan session user agar tidak terkena session fixation
             $request->session()->regenerate();
 
-            // Ambil data user yang berhasil login
+            // Ambil data user yang berhasil masuk
             $user = Auth::user();
 
             // Alihkan halaman berdasarkan role user tersebut
             return $this->redirectBasedOnRole($user);
         }
 
-        // 3. JIKA GAGAL: Kembalikan ke halaman login dan munculkan kotak merah pesan error
+        // 3. JIKA GAGAL: Kembalikan ke halaman login dan munculkan pesan error
         return back()->withErrors([
             'email' => 'Email atau kata sandi yang Anda masukkan tidak cocok dengan data kami.',
         ])->onlyInput('email');
     }
 
     /**
-     * Fungsi pembantu untuk mengarahkan rute berdasarkan role di database
+     * Fungsi pengarah rute otomatis berdasarkan role di database
      */
     private function redirectBasedOnRole($user)
     {
-        // Mengecek apakah rolenya bernilai 'passenger' atau 'penumpang'
-        if ($user->role === 'passenger' || $user->role === 'penumpang') {
-            return redirect()->intended('/dashboard');
-        }
+        // Pastikan properti role ada di dalam object user sebelum diubah ke huruf kecil
+        $role = isset($user->role) ? strtolower($user->role) : '';
 
-        // Mengecek apakah rolenya bernilai 'admin'
-        if ($user->role === 'admin') {
+        // 🌟 JIKA ADMIN (KAMU): Lempar langsung ke halaman dashboard jadwal merah gahar
+        if ($role === 'admin') {
             return redirect()->intended('/admin/jadwal');
         }
 
-        // Jika lolos dari semua syarat di atas (role tidak dikenali), paksa ke dashboard standar
-        return redirect()->intended('/dashboard');
+        // 🌟 JIKA PENUMPANG (TEMANMU): Arahkan ke rute halaman depan / dashboard penumpang miliknya
+        if ($role === 'passenger' || $role === 'penumpang' || $role === 'user') {
+            return redirect()->intended('/dashboard'); 
+        }
+
+        // Jika role di database ternyata kosong atau tidak dikenali, amankan ke halaman utama
+        return redirect()->intended('/');
     }
 
     /**
