@@ -12,20 +12,28 @@
 <!-- TOPBAR -->
 <div class="topbar" id="topbar">
   <a href="#" class="logo">
-    <div class="logo-icon"><i class="ti ti-train"></i></div>
-    KAI Tiket
+    VELOZZA
   </a>
   <div class="topbar-steps">
-    <div class="tstep done" id="s1"><div class="tstep-num"><i class="ti ti-check" style="font-size:10px"></i></div>Cari</div>
+    <div class="tstep active" id="s2">
+        <div class="tstep-num">1</div>Pilih Kereta
+    </div>
     <div class="tstep-sep">›</div>
-    <div class="tstep active" id="s2"><div class="tstep-num">2</div>Pilih Kereta</div>
+    
+    <div class="tstep" id="s3">
+        <div class="tstep-num">2</div>Pilih Kursi
+    </div>
     <div class="tstep-sep">›</div>
-    <div class="tstep" id="s3"><div class="tstep-num">3</div>Pilih Kursi</div>
+    
+    <div class="tstep" id="s4">
+        <div class="tstep-num">3</div>Penumpang
+    </div>
     <div class="tstep-sep">›</div>
-    <div class="tstep" id="s4"><div class="tstep-num">4</div>Penumpang</div>
-    <div class="tstep-sep">›</div>
-    <div class="tstep" id="s5"><div class="tstep-num">5</div>Konfirmasi</div>
-  </div>
+    
+    <div class="tstep" id="s5">
+        <div class="tstep-num">4</div>Konfirmasi
+    </div>
+</div>
 </div>
  
 <!-- HERO SEARCH -->
@@ -79,9 +87,9 @@
 <div class="page active" id="page-results">
   <div class="result-header">
     <div class="rh-route">
-      <i class="ti ti-map-pin"></i>Jakarta Gambir
+      <i class="ti ti-map-pin"></i>Jakarta
       <i class="ti ti-arrow-right"></i>
-      <i class="ti ti-map-pin"></i>Yogyakarta
+      <i class="ti ti-map-pin"></i>Bandung
     </div>
     <div class="rh-date">Senin, 15 Juni 2026</div>
     <span class="badge badge-orange">2 penumpang</span>
