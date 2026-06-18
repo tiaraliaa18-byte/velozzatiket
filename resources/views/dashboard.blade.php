@@ -43,14 +43,20 @@
     <div class="hero-sub">Temukan jadwal terbaik untuk perjalanan Anda</div>
     <div class="search-card">
       <div class="search-row">
-        <div class="sf sf-station">
-          <label>Dari</label>
-          <input type="text" id="from-inp" value="Jakarta Gambir">
-        </div>
-        <button class="swap-btn" onclick="swapSt()" title="Tukar stasiun"><i class="ti ti-arrows-exchange"></i></button>
-        <div class="sf sf-station">
+        <div class="sf" style="min-width:220px">
           <label>Ke</label>
-          <input type="text" id="to-inp" value="Yogyakarta">
+          <select>
+            <option>Bandung</option>
+          </select>
+        </div>
+        <button class="swap-btn" onclick="swapSt()" title="Tukar stasiun">→<i class="ti ti-arrows-exchange"></i></button>
+        <div class="sf" style="min-width:220px">
+          <label>Ke</label>
+          <select>
+            <option>Jakarta</option>
+            <option>Yogyakarta</option>
+            <option>Malang</option>
+          </select>
         </div>
         <div class="sf">
           <label>Tanggal</label>
@@ -59,9 +65,9 @@
         <div class="sf" style="min-width:auto;flex:0">
           <label>Penumpang</label>
           <div class="pax-counter">
-            <button class="pax-btn" onclick="chgPax(-1)">−</button>
-            <span class="pax-val" id="pax-val">2</span>
-            <button class="pax-btn" onclick="chgPax(1)">+</button>
+            <button type="button" class="pax-btn" id="pax-kurang">−</button>
+            <span class="pax-val" id="pax-val">1</span>
+            <button type="button" class="pax-btn" id="pax-tambah">+</button>
           </div>
         </div>
         <div class="sf" style="min-width:130px">
@@ -84,20 +90,6 @@
 <div class="main">
  
 <!-- PAGE 2: RESULTS -->
-<div class="page active" id="page-results">
-  <div class="result-header">
-    <div class="rh-route">
-      <i class="ti ti-map-pin"></i>Jakarta
-      <i class="ti ti-arrow-right"></i>
-      <i class="ti ti-map-pin"></i>Bandung
-    </div>
-    <div class="rh-date">Senin, 15 Juni 2026</div>
-    <span class="badge badge-orange">2 penumpang</span>
-    <button class="btn-sm" onclick="scrollToSearch()" style="margin-left:auto">
-      <i class="ti ti-pencil"></i>Ubah
-    </button>
-  </div>
- 
   <div class="layout-2col">
     <div>
       <div class="filter-tabs">
@@ -111,196 +103,56 @@
       </div>
  
       <!-- Train cards -->
-      <div class="train-card" onclick="selTrain(this,'Argo Bromo Anggrek','Eksekutif','07:00','12:05','580000','5j 05m','langsung')">
-        <div class="tc-main">
-          <div class="tc-name-block">
-            <div class="tc-name">Argo Bromo Anggrek</div>
-            <span class="tc-class-pill pill-exec">Eksekutif</span>
-          </div>
-          <div>
-            <div class="tc-time">07:00</div>
-            <div class="tc-sta">GMR</div>
-          </div>
-          <div class="tc-mid">
-            <div class="tc-dur">5j 05m</div>
-            <div class="tc-line"></div>
-            <div class="tc-stops">Langsung</div>
-          </div>
-          <div>
-            <div class="tc-time">12:05</div>
-            <div class="tc-sta">YK</div>
-          </div>
-          <div class="tc-price">
-            <div class="tc-price-amt">Rp 580.000</div>
-            <div class="tc-price-per">/orang</div>
-          </div>
-        </div>
-        <div class="tc-footer">
-          <span class="badge badge-green"><i class="ti ti-armchair" style="font-size:11px"></i> 24 kursi</span>
-          <span class="badge badge-blue">Makan</span>
-          <span class="badge badge-blue">WiFi</span>
-          <button class="btn-sm" style="margin-left:auto" onclick="showRoute(event,'Argo Bromo Anggrek')">
-            <i class="ti ti-route"></i>Rute
-          </button>
-        </div>
+      @foreach($daftarJadwal as $jadwal)
+  @php
+      // Mengambil jam & menit dari database
+      $jamMenit = \Carbon\Carbon::parse($jadwal->waktu_keberangkatan)->format('H:i:s');
+      
+      // Menggabungkan tanggal hari ini dengan jam dari database
+      $waktuDinamis = \Carbon\Carbon::today()->setTimeFromTimeString($jamMenit);
+      
+      // Mengambil durasi dari database, jika kosong otomatis default ke 5 jam
+      $durasiKereta = $jadwal->durasi ?? 5; 
+  @endphp
+
+  <div class="train-card" onclick="selTrain(this, '{{ $jadwal->nama_kereta }}', '{{ $jadwal->kelas }}', '{{ $waktuDinamis->format('H:i') }}', '-', '{{ $jadwal->harga_tiket }}', '{{ $durasiKereta }}j 00m', 'langsung')">
+    <div class="tc-main">
+      <div class="tc-name-block">
+        <div class="tc-name">{{ $jadwal->nama_kereta }}</div>
+        <span class="tc-class-pill 
+          @if($jadwal->kelas == 'Eksekutif') pill-exec 
+          @elseif($jadwal->kelas == 'Bisnis') pill-biz 
+          @else pill-eco @endif">
+          {{ $jadwal->kelas }}
+        </span>
       </div>
- 
-      <div class="train-card" onclick="selTrain(this,'Taksaka Pagi','Eksekutif','08:30','14:00','520000','5j 30m','langsung')">
-        <div class="tc-main">
-          <div class="tc-name-block">
-            <div class="tc-name">Taksaka Pagi</div>
-            <span class="tc-class-pill pill-exec">Eksekutif</span>
-          </div>
-          <div>
-            <div class="tc-time">08:30</div>
-            <div class="tc-sta">GMR</div>
-          </div>
-          <div class="tc-mid">
-            <div class="tc-dur">5j 30m</div>
-            <div class="tc-line"></div>
-            <div class="tc-stops">Langsung</div>
-          </div>
-          <div>
-            <div class="tc-time">14:00</div>
-            <div class="tc-sta">YK</div>
-          </div>
-          <div class="tc-price">
-            <div class="tc-price-amt">Rp 520.000</div>
-            <div class="tc-price-per">/orang</div>
-          </div>
-        </div>
-        <div class="tc-footer">
-          <span class="badge badge-orange"><i class="ti ti-armchair" style="font-size:11px"></i> 8 kursi</span>
-          <span class="badge badge-blue">WiFi</span>
-          <button class="btn-sm" style="margin-left:auto" onclick="showRoute(event,'Taksaka Pagi')">
-            <i class="ti ti-route"></i>Rute
-          </button>
-        </div>
+      <div>
+        <div class="tc-time">{{ $waktuDinamis->format('H:i') }}</div>
+        <div class="tc-sta">{{ $jadwal->asal }}</div>
       </div>
- 
-      <div class="train-card" onclick="selTrain(this,'Senja Utama YK','Bisnis','10:15','16:20','290000','6j 05m','1 pemberhentian')">
-        <div class="tc-main">
-          <div class="tc-name-block">
-            <div class="tc-name">Senja Utama YK</div>
-            <span class="tc-class-pill pill-biz">Bisnis</span>
-          </div>
-          <div>
-            <div class="tc-time">10:15</div>
-            <div class="tc-sta">GMR</div>
-          </div>
-          <div class="tc-mid">
-            <div class="tc-dur">6j 05m</div>
-            <div class="tc-line"></div>
-            <div class="tc-stops">1 pemberhentian</div>
-          </div>
-          <div>
-            <div class="tc-time">16:20</div>
-            <div class="tc-sta">YK</div>
-          </div>
-          <div class="tc-price">
-            <div class="tc-price-amt">Rp 290.000</div>
-            <div class="tc-price-per">/orang</div>
-          </div>
-        </div>
-        <div class="tc-footer">
-          <span class="badge badge-red"><i class="ti ti-armchair" style="font-size:11px"></i> 3 kursi</span>
-          <button class="btn-sm" style="margin-left:auto" onclick="showRoute(event,'Senja Utama YK')">
-            <i class="ti ti-route"></i>Rute
-          </button>
-        </div>
+      <div class="tc-mid">
+        <div class="tc-dur">{{ $durasiKereta }}j 00m</div>
+        <div class="tc-line"></div>
+        <div class="tc-stops">Langsung</div>
       </div>
- 
-      <div class="train-card" onclick="selTrain(this,'Lodaya Pagi','Bisnis','06:00','14:30','260000','8j 30m','2 pemberhentian')">
-        <div class="tc-main">
-          <div class="tc-name-block">
-            <div class="tc-name">Lodaya Pagi</div>
-            <span class="tc-class-pill pill-biz">Bisnis</span>
-          </div>
-          <div>
-            <div class="tc-time">06:00</div>
-            <div class="tc-sta">GMR</div>
-          </div>
-          <div class="tc-mid">
-            <div class="tc-dur">8j 30m</div>
-            <div class="tc-line"></div>
-            <div class="tc-stops">2 pemberhentian</div>
-          </div>
-          <div>
-            <div class="tc-time">14:30</div>
-            <div class="tc-sta">YK</div>
-          </div>
-          <div class="tc-price">
-            <div class="tc-price-amt">Rp 260.000</div>
-            <div class="tc-price-per">/orang</div>
-          </div>
-        </div>
-        <div class="tc-footer">
-          <span class="badge badge-green"><i class="ti ti-armchair" style="font-size:11px"></i> 42 kursi</span>
-          <button class="btn-sm" style="margin-left:auto" onclick="showRoute(event,'Lodaya Pagi')">
-            <i class="ti ti-route"></i>Rute
-          </button>
-        </div>
+      <div>
+        <div class="tc-time">{{ $waktuDinamis->copy()->addHours($durasiKereta)->format('H:i') }}</div>
+        <div class="tc-sta">{{ $jadwal->tujuan }}</div>
       </div>
- 
-      <div class="train-card" onclick="selTrain(this,'Gajayana','Eksekutif','14:00','19:45','610000','5j 45m','langsung')">
-        <div class="tc-main">
-          <div class="tc-name-block">
-            <div class="tc-name">Gajayana</div>
-            <span class="tc-class-pill pill-exec">Eksekutif</span>
-          </div>
-          <div>
-            <div class="tc-time">14:00</div>
-            <div class="tc-sta">GMR</div>
-          </div>
-          <div class="tc-mid">
-            <div class="tc-dur">5j 45m</div>
-            <div class="tc-line"></div>
-            <div class="tc-stops">Langsung</div>
-          </div>
-          <div>
-            <div class="tc-time">19:45</div>
-            <div class="tc-sta">YK</div>
-          </div>
-          <div class="tc-price">
-            <div class="tc-price-amt">Rp 610.000</div>
-            <div class="tc-price-per">/orang</div>
-          </div>
-        </div>
-        <div class="tc-footer">
-          <span class="badge badge-green"><i class="ti ti-armchair" style="font-size:11px"></i> 18 kursi</span>
-          <span class="badge badge-blue">Makan</span>
-          <span class="badge badge-blue">WiFi</span>
-          <button class="btn-sm" style="margin-left:auto" onclick="showRoute(event,'Gajayana')">
-            <i class="ti ti-route"></i>Rute
-          </button>
-        </div>
-      </div>
- 
-      <div style="margin-top:16px">
-        <button class="btn-primary" id="btn-pilih-kereta" disabled onclick="goPage('page-seat',3)">
-          Pilih Kursi <i class="ti ti-arrow-right"></i>
-        </button>
+      <div class="tc-price">
+        <div class="tc-price-amt">Rp {{ number_format($jadwal->harga_tiket, 0, ',', '.') }}</div>
+        <div class="tc-price-per">/orang</div>
       </div>
     </div>
- 
-    <!-- Route sidebar -->
-    <div id="route-sidebar" style="display:none">
-      <div class="route-panel">
-        <div class="route-header">
-          <div class="route-header-title" id="route-train-name">Detail Rute</div>
-          <div class="route-close" onclick="document.getElementById('route-sidebar').style.display='none'">
-            <i class="ti ti-x" style="font-size:14px"></i>
-          </div>
-        </div>
-        <div class="route-body">
-          <div class="stop-list" id="stop-list"></div>
-          <div class="notice notice-info" style="margin-top:14px">
-            <i class="ti ti-info-circle"></i>Estimasi jarak ±570 km
-          </div>
-        </div>
-      </div>
-    </div>
+    
+    <!-- Bagian tc-footer (fasilitas & rute) sudah dihapus dari sini -->
   </div>
+@endforeach
+
+<div style="clear: both; margin-top: 24px;">
+  <button class="btn-primary" id="btn-pilih-kereta" disabled onclick="goPage('page-seat',3)">
+    Pilih Kursi <i class="ti ti-arrow-right"></i>
+  </button>
 </div>
  
 <!-- PAGE 3: SEAT -->
@@ -568,6 +420,41 @@
 var pax=2, selPrice=580000, selSeats=[], selTrainName='Argo Bromo Anggrek';
 var taken=['1C','2A','2D','3B','3C','4C','5A','5D','6B','7A','7C'];
 var cdSecs=5387, cdTotal=5387;
+
+document.addEventListener("DOMContentLoaded", function() {
+    var btnKurang = document.getElementById('pax-kurang');
+    var btnTambah = document.getElementById('pax-tambah');
+    var txtPax = document.getElementById('pax-val');
+
+    if (btnKurang && btnTambah && txtPax) {
+        
+        // Aksi ketika tombol MINUS diklik
+        btnKurang.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation(); // Mencegah intervensi library luar
+            
+            var currentPax = parseInt(txtPax.textContent) || 1;
+            if (currentPax > 1) {
+                var newPax = currentPax - 1;
+                txtPax.textContent = newPax;
+                pax = newPax; // Sinkronisasi ke variabel global pax aplikasi Velozza
+            }
+        });
+
+        // Aksi ketika tombol PLUS diklik
+        btnTambah.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation(); // Mencegah intervensi library luar
+            
+            var currentPax = parseInt(txtPax.textContent) || 1;
+            if (currentPax < 6) {
+                var newPax = currentPax + 1;
+                txtPax.textContent = newPax;
+                pax = newPax; // Sinkronisasi ke variabel global pax aplikasi Velozza
+            }
+        });
+    }
+});
  
 function goPage(id, step){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -584,13 +471,6 @@ function swapSt(){
   var f=document.getElementById('from-inp'), t=document.getElementById('to-inp');
   var tmp=f.value; f.value=t.value; t.value=tmp;
 }
- 
-function chgPax(d){
-  pax=Math.max(1,Math.min(6,pax+d));
-  document.getElementById('pax-val').textContent=pax;
-}
- 
-function scrollToSearch(){ window.scrollTo(0,0); }
  
 function selTrain(el,name,cls,dep,arr,price,dur,stops){
   document.querySelectorAll('.train-card').forEach(c=>c.classList.remove('selected'));
@@ -638,22 +518,6 @@ var routeData = {
     {name:'Yogyakarta',time:'19:45 · Tiba',type:'end'}
   ]
 };
- 
-function showRoute(e,name){
-  e.stopPropagation();
-  var sb=document.getElementById('route-sidebar');
-  sb.style.display='block';
-  document.getElementById('route-train-name').textContent=name;
-  var stops=routeData[name]||[];
-  var html='';
-  stops.forEach(function(s,i){
-    var dotClass=s.type==='start'||s.type==='end'?'stop-dot':'stop-dot mid';
-    html+='<div class="stop-item"><div class="'+dotClass+'"></div>';
-    html+='<div class="stop-name">'+s.name+'</div>';
-    html+='<div class="stop-time">'+s.time+'</div></div>';
-  });
-  document.getElementById('stop-list').innerHTML=html;
-}
  
 function buildSeats(){
   var map=document.getElementById('seat-map');

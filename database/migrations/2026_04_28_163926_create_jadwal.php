@@ -10,6 +10,8 @@ return new class extends Migration
     {
         Schema::create('jadwal', function (Blueprint $table) {
             $table->id('id_jadwal'); // Primary Key 
+            $table->string('nama_kereta');
+            $table->string('kelas');
             $table->string('asal');
             $table->string('tujuan');
             $table->dateTime('waktu_keberangkatan');

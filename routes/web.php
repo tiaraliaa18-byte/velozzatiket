@@ -2,8 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\PenumpangController;
 use App\Http\Controllers\AdminJadwalController;
+use App\Http\Controllers\JadwalController; // Controller untuk jadwal dashboard penumpang
 
 // Halaman awal
 Route::get('/', [AuthController::class, 'showLogin']);
@@ -15,15 +15,15 @@ Route::post('/login', [AuthController::class, 'login']);
 // Logout
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// Dashboard Penumpang
-Route::get('/dashboard', [PenumpangController::class, 'index']);
+// Dashboard Penumpang (SUDAH DIPERBAIKI: Menggunakan JadwalController agar data dinamis)
+Route::get('/dashboard', [JadwalController::class, 'index'])->name('dashboard');
 
 // Dashboard Admin
 Route::get('/admin/dashboard', function () {
     return "<h1>Halaman Dashboard Admin Velozza Berhasil Terbuka!</h1>";
 });
 
-// Kelola Jadwal Kereta
+// Kelola Jadwal Kereta (Sisi Admin)
 Route::get('/admin/jadwal', [AdminJadwalController::class, 'index']);
 Route::post('/admin/jadwal', [AdminJadwalController::class, 'store']);
 Route::delete('/admin/jadwal/{id}', [AdminJadwalController::class, 'destroy']);
