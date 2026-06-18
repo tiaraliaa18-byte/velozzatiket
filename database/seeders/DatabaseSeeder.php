@@ -2,7 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -11,7 +13,20 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // untuk memanggil UserSeeder
-        $this->call(UserSeeder::class);
+        // Membuat akun Penumpang (Passenger)
+        User::create([
+            'nama' => 'Tiara Penumpang',
+            'email' => 'penumpang@velozza.com',
+            'password' => Hash::make('password123'), // Ini cara enkripsi password yang benar di Laravel
+            'role' => 'passenger', // atau 'penumpang' (sesuaikan dengan enum/kolom di database kamu)
+        ]);
+
+        // Membuat akun Admin (Opsional)
+        User::create([
+            'name' => 'Admin Velozza',
+            'email' => 'admin@velozza.com',
+            'password' => Hash::make('password123'),
+            'role' => 'admin',
+        ]);
     }
 }

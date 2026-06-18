@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\User; // Tambahkan ini agar Laravel mengenali model User
 
 class AuthController extends Controller
 {
@@ -12,16 +13,16 @@ class AuthController extends Controller
      */
     public function showLogin()
     {
-        // Jika user sudah terlanjur login, langsung lempar ke dashboard sesuai hak aksesnya
         if (Auth::check()) {
-            return $this->redirectBasedOnRole(Auth::user());
+            $user = Auth::user();
+            return $this->redirectBasedOnRole($user);
         }
 
         return view('login');
     }
 
     /**
-     * Memproses data login dari form
+     * Memproses login
      */
     public function login(Request $request)
     {
@@ -29,10 +30,6 @@ class AuthController extends Controller
         $credentials = $request->validate([
             'email' => 'required|email',
             'password' => 'required',
-        ], [
-            'email.required' => 'Alamat email wajib diisi.',
-            'email.email' => 'Format email tidak valid.',
-            'password.required' => 'Kata sandi wajib diisi.',
         ]);
 
         // 2. Coba lakukan proses otentikasi login ke database
@@ -49,7 +46,7 @@ class AuthController extends Controller
 
         // 3. JIKA GAGAL: Kembalikan ke halaman login dan munculkan pesan error
         return back()->withErrors([
-            'email' => 'Email atau kata sandi yang Anda masukkan tidak cocok dengan data kami.',
+            'email' => 'Email atau password salah.',
         ])->onlyInput('email');
     }
 
@@ -61,12 +58,12 @@ class AuthController extends Controller
         // Pastikan properti role ada di dalam object user sebelum diubah ke huruf kecil
         $role = isset($user->role) ? strtolower($user->role) : '';
 
-        // 🌟 JIKA ADMIN (KAMU): Lempar langsung ke halaman dashboard jadwal merah gahar
+        // 🌟 JIKA ADMIN: Lempar langsung ke halaman dashboard jadwal admin
         if ($role === 'admin') {
             return redirect()->intended('/admin/jadwal');
         }
 
-        // 🌟 JIKA PENUMPANG (TEMANMU): Arahkan ke rute halaman depan / dashboard penumpang miliknya
+        // 🌟 JIKA PENUMPANG: Arahkan ke rute halaman depan / dashboard penumpang miliknya
         if ($role === 'passenger' || $role === 'penumpang' || $role === 'user') {
             return redirect()->intended('/dashboard'); 
         }
