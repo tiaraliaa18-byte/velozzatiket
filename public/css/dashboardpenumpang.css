@@ -185,33 +185,82 @@ body {
   transition: all .2s;
   box-shadow: 0 4px 16px rgba(214,40,40,0.35);
 }
+.btn-pilih-kursi-kamu {
+    width: 100%;
+    padding: 15px;
+    background: #ffb085; /* Warna peach pudar bawaan */
+    border: none;
+    border-radius: 10px;
+    color: #ffffff;
+    font-weight: bold;
+    cursor: not-allowed; /* Menunjukkan bahwa belum bisa diklik */
+    transition: all 0.3s ease; /* Biar ada efek transisi halus saat berubah warna */
+}
+.btn-pilih-kursi-kamu:not([disabled]) {
+    background: #ff5e3a; /* Warna jingga menyala khas Velozza kamu */
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(255, 94, 58, 0.2);
+}
 .btn-search:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(214,40,40,0.45); }
 .btn-search:active { transform: translateY(0); }
  
 .pax-counter {
-  display: flex; align-items: center; gap: 8px;
-  height: 44px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between; /* Membuat tombol + - dan angka menyebar rapi */
+    gap: 8px;
+    height: 44px; /* Disamakan dengan tinggi .sf input dan .sf select agar sejajar */
+    width: 100%;  /* Mengikuti lebar container .sf di atasnya */
+    max-width: 120px; /* Membatasi agar tidak terlalu melar ke samping */
+    box-sizing: border-box;
 }
-.pax-btn, .btn-pax-kustom {
-  background-color: #fff;
-  border: 1px solid #ff4d4d;
-  width: 28px; height: 28px;
-  border-radius: 50%;
-  border: 1.5px solid var(--border-md);
-  background: #fff;
-  cursor: pointer;
-  font-size: 16px; line-height: 1;
-  display: flex; align-items: center; justify-content: center;
-  color: var(--red);
-  font-weight: 700;
-  transition: all .15s;
+
+/* Selector spesifik agar mengunci elemen tombol di dalam .pax-counter */
+.pax-counter .btn-pax {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border-md);
+    background: #fff;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    display: inline-flex; 
+    align-items: center;
+    justify-content: center;
+    color: var(--red);
+    font-weight: 700;
+    transition: all .15s;
+    padding: 0; 
 }
-.pax-btn:hover { background: var(--red); color: #fff; border-color: var(--red); }
-.pax-val { font-size: 16px; font-weight: 600; min-width: 22px; text-align: center; color: var(--text-dark); }
- 
+
+/* Efek Hover Tombol */
+.pax-counter .btn-pax:hover { 
+    background: var(--red); 
+    color: #fff; 
+    border-color: var(--red); 
+}
+
+/* Angka Penumpang */
+.pax-counter #pax-val { 
+    font-size: 16px; 
+    font-weight: 600; 
+    min-width: 22px; 
+    text-align: center; 
+    color: var(--text-dark); 
+    line-height: 28px; /* Menyelaraskan teks angka di tengah secara vertikal */
+}
 /* ─── CONTENT ─── */
 .main { padding: 28px 32px; max-width: 1200px; margin: 0 auto; }
-.page { display: none; }
+.page {
+    display: none;
+    width: 100%;
+    transition: all 0.3s ease;
+}
+#page-tickets {
+    display: block; /* atau sesuai layout asli kamu */
+}
 .page.active { display: block; }
  
 .rh-route i { color: var(--orange); }
@@ -239,6 +288,15 @@ body {
 .card-title i { color: var(--red); font-size: 17px; }
  
 /* ─── FILTER TABS ─── */
+/* Pembungkus baris filter kelas & tombol sort harga */
+.filter-sort-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    width: 100%;
+}
+
 .filter-tabs {
   display: flex; gap: 6px;
   margin-bottom: 16px;
@@ -274,6 +332,15 @@ body {
   position: relative;
   overflow: hidden;
 }
+
+/* Kontainer daftar kartu kereta agar rapi berurutan ke bawah */
+#train-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+}
+
 .train-card::before {
   content: '';
   position: absolute;
@@ -703,5 +770,18 @@ body {
   background: var(--red);
   color: #fff;
   border-color: transparent;
+}
+
+/* ─── SORT TAB ─── */
+/* Tombol Harga Terendah */
+/* Buat tombol sort-tab mengikuti style dasar gtab */
+.sort-tab {
+    cursor: pointer;
+}
+
+/* Ketika aktif, warnanya disamakan dengan efek .gtab.active milikmu */
+.sort-tab.active {
+    background: #dc3545; /* Sesuaikan dengan warna merah filter kelasmu */
+    color: #ffffff;
 }
 

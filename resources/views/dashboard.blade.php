@@ -41,47 +41,56 @@
   <div style="max-width:1200px;margin:0 auto">
     <div class="hero-title">Pesan Tiket Kereta</div>
     <div class="hero-sub">Temukan jadwal terbaik untuk perjalanan Anda</div>
+
     <div class="search-card">
       <div class="search-row">
+
         <div class="sf" style="min-width:220px">
-          <label>Ke</label>
-          <select>
-            <option>Bandung</option>
+          <label>Dari</label>
+          <select id="input-asal">
+            <option value="Bandung">Bandung</option>
           </select>
         </div>
+
         <button class="swap-btn" onclick="swapSt()" title="Tukar stasiun">→<i class="ti ti-arrows-exchange"></i></button>
+
         <div class="sf" style="min-width:220px">
           <label>Ke</label>
-          <select>
-            <option>Jakarta</option>
-            <option>Yogyakarta</option>
-            <option>Malang</option>
+          <select id="input-tujuan">
+            <option value="Jakarta">Jakarta</option>
+            <option value="Yogyakarta">Yogyakarta</option>
+            <option value="Malang">Malang</option>
           </select>
         </div>
+
         <div class="sf">
           <label>Tanggal</label>
-          <input type="date" value="2026-06-15" style="width:160px">
+          <input type="date" 
+                 id="input-tanggal" 
+                 value="{{ \Carbon\Carbon::today()->format('Y-m-d') }}" 
+                 style="width:160px">
         </div>
-        <div class="sf" style="min-width:auto;flex:0">
+
+        <div class="sf" style="min-width: 120px; flex: 0 0 auto;">
           <label>Penumpang</label>
-          <div class="pax-counter">
-            <button type="button" class="pax-btn" id="pax-kurang">−</button>
-            <span class="pax-val" id="pax-val">1</span>
-            <button type="button" class="pax-btn" id="pax-tambah">+</button>
-          </div>
+            <div class="pax-counter">
+                <button id="pax-kurang" class="btn-pax">-</button>
+                <span id="pax-val">1</span>
+                <button id="pax-tambah" class="btn-pax">+</button>
+            </div>
         </div>
+
         <div class="sf" style="min-width:130px">
           <label>Kelas</label>
-          <select>
-            <option>Semua Kelas</option>
-            <option>Eksekutif</option>
-            <option>Bisnis</option>
-            <option>Ekonomi</option>
+          <select id="input-kelas">
+            <option value="semua">Semua Kelas</option>
+            <option value="eksekutif">Eksekutif</option>
+            <option value="bisnis">Bisnis</option>
+            <option value="ekonomi">Ekonomi</option>
           </select>
         </div>
-        <button class="btn-search" onclick="goPage('page-results',2)">
-          <i class="ti ti-search"></i>Cari Tiket
-        </button>
+
+        <button class="btn-search" onclick="filterTiket()">Cari Tiket</button>
       </div>
     </div>
   </div>
@@ -92,37 +101,51 @@
 <!-- PAGE 2: RESULTS -->
   <div class="layout-2col">
     <div>
-      <div class="filter-tabs">
-        <div class="ftab active">Semua (8)</div>
-        <div class="ftab">Eksekutif</div>
-        <div class="ftab">Bisnis</div>
-        <div class="ftab">Ekonomi</div>
-        <div class="ftab" style="margin-left:auto">
-          <i class="ti ti-arrows-sort" style="font-size:12px;vertical-align:-1px"></i> Harga Terendah
+        <div class="filter-sort-wrapper">
+            <div class="filter-tabs">
+                <div class="gtab active" onclick="filterClass(this, 'all')">Semua</div>
+                <div class="gtab" onclick="filterClass(this, 'eksekutif')">Eksekutif</div>
+                <div class="gtab" onclick="filterClass(this, 'bisnis')">Bisnis</div>
+                <div class="gtab" onclick="filterClass(this, 'ekonomi')">Ekonomi</div>
+            </div>
+
+            <div class="gtab sort-tab" onclick="triggerSortPrice(this, 'low-to-high')">
+                Harga Terendah
+            </div>
         </div>
-      </div>
- 
+
       <!-- Train cards -->
+<div id="train-list-container" style="display: flex; flex-direction: column; gap: 15px; width: 100%;">
+
       @foreach($daftarJadwal as $jadwal)
   @php
-      // Mengambil jam & menit dari database
+      // 1. Mengambil jam & menit keberangkatan dari database
       $jamMenit = \Carbon\Carbon::parse($jadwal->waktu_keberangkatan)->format('H:i:s');
-      
-      // Menggabungkan tanggal hari ini dengan jam dari database
       $waktuDinamis = \Carbon\Carbon::today()->setTimeFromTimeString($jamMenit);
       
-      // Mengambil durasi dari database, jika kosong otomatis default ke 5 jam
-      $durasiKereta = $jadwal->durasi ?? 5; 
+      // 2. Mengambil total durasi menit dari database (jika kosong, default 5 jam = 300 menit)
+      $totalMenit = $jadwal->durasi ?? 300; 
+      
+      // 3. Pecah total menit menjadi Jam dan Menit untuk tampilan teks
+      $tampilanJam = floor($totalMenit / 60);
+      $tampilanMenit = $totalMenit % 60;
+      $teksDurasi = $tampilanJam . "j " . str_pad($tampilanMenit, 2, "0", STR_PAD_LEFT) . "m";
+      
+      // 4. Hitung waktu tiba secara dinamis
+      $waktuTiba = $waktuDinamis->copy()->addMinutes($totalMenit)->format('H:i');
   @endphp
 
-  <div class="train-card" onclick="selTrain(this, '{{ $jadwal->nama_kereta }}', '{{ $jadwal->kelas }}', '{{ $waktuDinamis->format('H:i') }}', '-', '{{ $jadwal->harga_tiket }}', '{{ $durasiKereta }}j 00m', 'langsung')">
+<div class="train-card" 
+     data-asal="{{ strtolower($jadwal->asal) }}" 
+     data-tujuan="{{ strtolower($jadwal->tujuan) }}" 
+     data-tanggal="{{ $jadwal->tanggal_berangkat }}" 
+     data-kelas="{{ strtolower($jadwal->kelas) }}" 
+     data-price="{{ $jadwal->harga_tiket }}" 
+     onclick="selTrain(this, '{{ $jadwal->nama_kereta }}', '{{ $jadwal->kelas }}', '{{ $waktuDinamis->format('H:i') }}', '{{ $waktuTiba }}', '{{ $jadwal->harga_tiket }}', '{{ $teksDurasi }}', 'langsung')">
     <div class="tc-main">
       <div class="tc-name-block">
         <div class="tc-name">{{ $jadwal->nama_kereta }}</div>
-        <span class="tc-class-pill 
-          @if($jadwal->kelas == 'Eksekutif') pill-exec 
-          @elseif($jadwal->kelas == 'Bisnis') pill-biz 
-          @else pill-eco @endif">
+        <span class="tc-class-pill @if($jadwal->kelas == 'Eksekutif') pill-exec @elseif($jadwal->kelas == 'Bisnis') pill-biz @else pill-eco @endif">
           {{ $jadwal->kelas }}
         </span>
       </div>
@@ -131,12 +154,12 @@
         <div class="tc-sta">{{ $jadwal->asal }}</div>
       </div>
       <div class="tc-mid">
-        <div class="tc-dur">{{ $durasiKereta }}j 00m</div>
+        <div class="tc-dur">{{ $teksDurasi }}</div>
         <div class="tc-line"></div>
         <div class="tc-stops">Langsung</div>
       </div>
       <div>
-        <div class="tc-time">{{ $waktuDinamis->copy()->addHours($durasiKereta)->format('H:i') }}</div>
+        <div class="tc-time">{{ $waktuTiba }}</div>
         <div class="tc-sta">{{ $jadwal->tujuan }}</div>
       </div>
       <div class="tc-price">
@@ -144,26 +167,26 @@
         <div class="tc-price-per">/orang</div>
       </div>
     </div>
-    
-    <!-- Bagian tc-footer (fasilitas & rute) sudah dihapus dari sini -->
   </div>
 @endforeach
 
-<div style="clear: both; margin-top: 24px;">
-  <button class="btn-primary" id="btn-pilih-kereta" disabled onclick="goPage('page-seat',3)">
-    Pilih Kursi <i class="ti ti-arrow-right"></i>
+</div> 
+
+<div style="margin-top: 20px; width: 100%;">
+  <button id="btn-pilih-kereta" class="btn-pilih-kursi-kamu" onclick="goPage('page-seats', 2)" disabled>
+    Pilih Kursi
   </button>
 </div>
  
 <!-- PAGE 3: SEAT -->
-<div class="page" id="page-seat">
+<div class="page" id="page-seats" style="display: none;">
   <div class="layout-sidebar">
     <div>
       <div class="card">
         <div class="card-body">
           <div class="card-title"><i class="ti ti-armchair"></i>Pilih Kursi</div>
           <div class="notice notice-info" style="margin-bottom:16px">
-            <i class="ti ti-users"></i>Pilih 2 kursi untuk penumpang Anda
+            <i class="ti ti-users"></i>Pilih <b id="notice-pax-count">1</b> kursi untuk penumpang Anda
           </div>
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
             <div style="font-size:13px;font-weight:600;color:var(--text-mid)" id="seat-train-lbl">Argo Bromo Anggrek · Eksekutif</div>
@@ -193,6 +216,7 @@
         </div>
       </div>
     </div>
+    
     <div>
       <div class="summary-card">
         <div class="summary-header">
@@ -202,9 +226,10 @@
           <div class="sum-row"><span class="sum-label">Kereta</span><span class="sum-val" id="s-train">Argo Bromo</span></div>
           <div class="sum-row"><span class="sum-label">Kursi</span><span class="sum-val" id="s-seats">—</span></div>
           <div class="sum-row"><span class="sum-label">Harga/orang</span><span class="sum-val" id="s-price">Rp 580.000</span></div>
-          <div class="sum-row"><span class="sum-label">Penumpang</span><span class="sum-val">2 orang</span></div>
+          <div class="sum-row"><span class="sum-label">Penumpang</span><span class="sum-val" id="s-pax">1 orang</span></div>
           <div class="sum-total"><span>Total</span><span class="sum-total-amt" id="s-total">Rp 1.160.000</span></div>
-          <button class="btn-primary" id="btn-lanjut-kursi" disabled onclick="goPage('page-passenger',4)" style="margin-top:14px">
+          
+          <button class="btn-primary" id="btn-lanjut-kursi" disabled onclick="goPage('page-passenger', 3)" style="margin-top:14px">
             Data Penumpang <i class="ti ti-arrow-right"></i>
           </button>
         </div>
@@ -212,7 +237,7 @@
     </div>
   </div>
 </div>
- 
+
 <!-- PAGE 4: PASSENGER -->
 <div class="page" id="page-passenger">
   <div class="layout-sidebar">
@@ -417,54 +442,211 @@
 </div><!-- .main -->
  
 <script>
-var pax=2, selPrice=580000, selSeats=[], selTrainName='Argo Bromo Anggrek';
-var taken=['1C','2A','2D','3B','3C','4C','5A','5D','6B','7A','7C'];
-var cdSecs=5387, cdTotal=5387;
+// Biarkan variabel global ini polosan dulu, nanti diisi saat DOM siap atau saat kereta diklik
+var pax = 2; 
+var selPrice = 580000, selSeats = [], selTrainName = 'Argo Bromo Anggrek';
+var taken = ['1C','2A','2D','3B','3C','4C','5A','5D','6B','7A','7C'];
+var cdSecs = 5387, cdTotal = 5387;
 
 document.addEventListener("DOMContentLoaded", function() {
     var btnKurang = document.getElementById('pax-kurang');
     var btnTambah = document.getElementById('pax-tambah');
     var txtPax = document.getElementById('pax-val');
 
+    // Set nilai awal variabel global pax dari text HTML saat halaman pertama beres dimuat
+    if (txtPax) {
+        pax = parseInt(txtPax.textContent) || 2;
+    }
+
+    // Fungsi update otomatis ketika tombol + atau - diklik
+    function sinkronisasiManual() {
+        var currentPax = parseInt(txtPax.textContent) || 1;
+        pax = currentPax; // Update variabel global pax aplikasi Velozza
+
+        // 1. Update Teks Penumpang di Ringkasan (Panah Biru)
+        var txtRingkasanPax = document.getElementById('s-pax'); 
+        if (txtRingkasanPax) {
+            txtRingkasanPax.textContent = currentPax + ' orang';
+        }
+
+        // 2. Update Teks Notice Pilih Kursi (Kotak Kiri)
+        var txtNoticePax = document.getElementById('notice-pax-count');
+        if (txtNoticePax) {
+            txtNoticePax.textContent = currentPax;
+        }
+
+        // 3. Hitung ulang total harga secara real-time
+        if (typeof selPrice !== 'undefined' && selPrice > 0) {
+            var totalHarga = selPrice * currentPax;
+            var elTotal = document.getElementById('s-total');
+            if (elTotal) {
+                elTotal.textContent = 'Rp ' + totalHarga.toLocaleString('id-ID');
+            }
+        }
+
+        // 4. Reset kursi terpilih karena jumlah kapasitas penumpang berubah
+        selSeats = [];
+        buildSeats();
+    }
+
     if (btnKurang && btnTambah && txtPax) {
-        
         // Aksi ketika tombol MINUS diklik
         btnKurang.addEventListener('click', function(e) {
             e.preventDefault();
-            e.stopPropagation(); // Mencegah intervensi library luar
+            e.stopPropagation(); 
             
             var currentPax = parseInt(txtPax.textContent) || 1;
             if (currentPax > 1) {
                 var newPax = currentPax - 1;
                 txtPax.textContent = newPax;
-                pax = newPax; // Sinkronisasi ke variabel global pax aplikasi Velozza
+                sinkronisasiManual(); // Jalankan fungsi update
             }
         });
 
         // Aksi ketika tombol PLUS diklik
         btnTambah.addEventListener('click', function(e) {
             e.preventDefault();
-            e.stopPropagation(); // Mencegah intervensi library luar
+            e.stopPropagation(); 
             
             var currentPax = parseInt(txtPax.textContent) || 1;
             if (currentPax < 6) {
                 var newPax = currentPax + 1;
                 txtPax.textContent = newPax;
-                pax = newPax; // Sinkronisasi ke variabel global pax aplikasi Velozza
+                sinkronisasiManual(); // Jalankan fungsi update
             }
         });
     }
 });
- 
-function goPage(id, step){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  document.querySelectorAll('.tstep').forEach((s,i)=>{
-    s.classList.remove('active','done');
-    if(i+1<step) s.classList.add('done');
-    else if(i+1===step) s.classList.add('active');
-  });
-  window.scrollTo(0,0);
+
+function filterTiket() {
+    // 1. Ambil nilai input dari form atas (sudah huruf kecil semua)
+    const asalUser = document.getElementById('input-asal').value.toLowerCase().trim();
+    const tujuanUser = document.getElementById('input-tujuan').value.toLowerCase().trim();
+    const kelasUser = document.getElementById('input-kelas').value.toLowerCase().trim();
+
+    // 2. Ambil semua elemen kartu kereta
+    const semuaKartu = document.querySelectorAll('.train-card');
+    let tiketDitemukan = false;
+
+    semuaKartu.forEach(kartu => {
+        // Ambil data atribut dari kartu
+        const dataAsal = (kartu.getAttribute('data-asal') || '').toLowerCase().trim();
+        const dataTujuan = (kartu.getAttribute('data-tujuan') || '').toLowerCase().trim();
+        const dataKelas = (kartu.getAttribute('data-kelas') || '').toLowerCase().trim();
+
+        // 3. LOGIKA JAUH LEBIH LONGGAR (Menggunakan .includes() bukan ===)
+        // Jadi kalau dataAsal isinya "stasiun bandung", dia akan tetap lolos jika asalUser "bandung"
+        const cocokAsal = (dataAsal.includes(asalUser) || asalUser === "");
+        const cocokTujuan = (dataTujuan.includes(tujuanUser) || tujuanUser === "");
+        const cocokKelas = (kelasUser === "semua" || kelasUser === "" || dataKelas.includes(kelasUser));
+
+        // 4. Tampilkan jika semua kriteria COCOK
+        if (cocokAsal && cocokTujuan && cocokKelas) {
+            kartu.style.display = ""; 
+            tiketDitemukan = true;
+        } else {
+            kartu.style.display = "none";
+        }   
+    });
+
+    // 5. Atur Pesan Error Jika Tidak Ada Sama Sekali yang Cocok
+    const container = document.getElementById('train-list-container');
+    let pesanKosong = document.getElementById('no-ticket-message');
+
+    if (!tiketDitemukan) {
+        if (!pesanKosong) {
+            pesanKosong = document.createElement('div');
+            pesanKosong.id = 'no-ticket-message';
+            pesanKosong.style.cssText = 'text-align: center; padding: 40px; color: #888; font-weight: 500; background: #fff; border-radius: 8px; margin-top: 15px; width: 100%;';
+            pesanKosong.innerHTML = '⚠️ Maaf, jadwal perjalanan kereta tidak ditemukan.';
+            container.appendChild(pesanKosong);
+        }
+    } else {
+        if (pesanKosong) {
+            pesanKosong.remove();
+        }
+    }
+}
+
+function triggerSortPrice(el, order) {
+    // 1. Matikan status 'active' pada tombol filter kelas (Semua/Eksekutif/dll) jika ada,
+    // atau sesama tombol sorting agar tidak bentrok visualnya.
+    document.querySelectorAll('.filter-tabs .gtab, .sort-tab').forEach(btn => {
+        btn.classList.remove('active');
+    });
+
+    // 2. Nyalakan status 'active' (warna merah menyala) pada tombol "Harga Terendah" yang diklik
+    if (el) {
+        el.classList.add('active');
+    }
+
+    // 3. Panggil fungsi inti untuk mengurutkan harga kartu kereta
+    if (typeof sortPrice === 'function') {
+        sortPrice(order);
+    } else {
+        console.error("Fungsi sortPrice(order) tidak ditemukan di dalam script!");
+    }
+}
+
+function sortPrice(order) {
+    var container = document.getElementById('train-list-container');
+    if (!container) return;
+
+    // Ambil semua kartu kereta (.train-card) di dalam kontainer
+    var cards = Array.from(container.querySelectorAll('.train-card'));
+
+    // 1. Deteksi filter kelas apa yang saat ini sedang aktif (Semua / Eksekutif / Bisnis / Ekonomi)
+    var activeFilterTab = document.querySelector('.filter-tabs .gtab.active');
+    var currentClassFilter = activeFilterTab ? activeFilterTab.textContent.trim().toLowerCase() : 'all';
+    if (currentClassFilter === 'semua') currentClassFilter = 'all';
+
+    // 2. Urutkan susunan array kartu berdasarkan isi atribut data-price HTML
+    cards.sort(function(a, b) {
+        var priceA = parseInt(a.getAttribute('data-price')) || 0;
+        var priceB = parseInt(b.getAttribute('data-price')) || 0;
+
+        if (order === 'low-to-high') {
+            return priceA - priceB; // Urutan dari termurah ke termahal
+        }
+        return 0;
+    });
+
+    // 3. Masukkan kembali susunan kartu baru ke HTML sembari menjaga aturan filter kelas
+    cards.forEach(function(card) {
+        container.appendChild(card);
+
+        var cardClass = card.getAttribute('data-class') || '';
+
+        // Jika filter kelas aktif selain 'all' dan tidak cocok dengan kartu ini, sembunyikan!
+        if (currentClassFilter !== 'all' && cardClass !== currentClassFilter) {
+            card.style.display = 'none';
+        } else {
+            card.style.display = 'block';
+        }
+    });
+}
+
+function filterClass(el, className) {
+    // Matikan lampu 'active' pada tab filter kelas sesama komponennya
+    document.querySelectorAll('.filter-tabs .gtab').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    if (el) el.classList.add('active');
+
+    var cards = document.querySelectorAll('.train-card');
+    cards.forEach(card => {
+        var cardClass = card.getAttribute('data-class');
+        
+        if (className === 'all') {
+            card.style.display = 'block';
+        } else {
+            if (cardClass === className.toLowerCase()) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        }
+    });
 }
  
 function swapSt(){
@@ -473,54 +655,60 @@ function swapSt(){
 }
  
 function selTrain(el,name,cls,dep,arr,price,dur,stops){
-  document.querySelectorAll('.train-card').forEach(c=>c.classList.remove('selected'));
+  document.querySelectorAll('.train-card').forEach(c => c.classList.remove('selected'));
+  
   el.classList.add('selected');
-  selTrainName=name; selPrice=parseInt(price);
-  document.getElementById('btn-pilih-kereta').disabled=false;
-  document.getElementById('seat-train-lbl').textContent=name+' · '+cls;
-  document.getElementById('s-train').textContent=name.split(' ').slice(0,2).join(' ');
-  document.getElementById('s2-train').textContent=name.split(' ').slice(0,2).join(' ');
-  document.getElementById('s-price').textContent='Rp '+parseInt(price).toLocaleString('id-ID');
-  document.getElementById('s-total').textContent='Rp '+(parseInt(price)*2).toLocaleString('id-ID');
-  document.getElementById('tck-train').textContent=name;
-  document.getElementById('tck-dep').textContent=dep;
-  document.getElementById('tck-arr').textContent=arr;
-  document.getElementById('tck-dur').textContent=dur;
+  
+  selTrainName=name; 
+  selPrice=parseInt(price);
+  
+  var txtPax = document.getElementById('pax-val');
+  var jumlahPenumpang = txtPax ? parseInt(txtPax.textContent) : 1;
+  pax = jumlahPenumpang; // Set ke variabel global aplikasi Velozza
+
+  // Hitung total harga sesuai jumlah penumpang asli
+  var totalHarga = selPrice * jumlahPenumpang;
+
+var btnPilih = document.getElementById('btn-pilih-kereta');
+  if (btnPilih) {
+      btnPilih.disabled = false;
+  }
+  
+  if(document.getElementById('seat-train-lbl')) document.getElementById('seat-train-lbl').textContent=name+' · '+cls;
+  if(document.getElementById('s-train')) document.getElementById('s-train').textContent=name.split(' ').slice(0,2).join(' ');
+  if(document.getElementById('s2-train')) document.getElementById('s2-train').textContent=name.split(' ').slice(0,2).join(' ');
+  if(document.getElementById('s-price')) document.getElementById('s-price').textContent='Rp '+selPrice.toLocaleString('id-ID');
+  
+  // Update total harga ke ringkasan bawah
+  if(document.getElementById('s-total')) document.getElementById('s-total').textContent='Rp '+totalHarga.toLocaleString('id-ID');
+  
+  // Update teks jumlah penumpang di ringkasan kanan
+  var txtRingkasanPax = document.getElementById('s-pax'); 
+  if (txtRingkasanPax) {
+      txtRingkasanPax.textContent = jumlahPenumpang + ' orang';
+  }
+
+  // Update teks info sisa kursi di kotak kiri pilih kursi
+  var txtNoticePax = document.getElementById('notice-pax-count');
+  if (txtNoticePax) {
+      txtNoticePax.textContent = jumlahPenumpang;
+  }
+
+  if(document.getElementById('tck-train')) document.getElementById('tck-train').textContent=name;
+  if(document.getElementById('tck-dep')) document.getElementById('tck-dep').textContent=dep;
+  if(document.getElementById('tck-arr')) document.getElementById('tck-arr').textContent=arr;
+  if(document.getElementById('tck-dur')) document.getElementById('tck-dur').textContent=dur;
+  
   selSeats=[];
-  buildSeats();
+  
+  if (typeof buildSeats === "function") {
+      buildSeats();
+  }
 }
- 
-var routeData = {
-  'Argo Bromo Anggrek': [
-    {name:'Jakarta Gambir',time:'07:00 · Berangkat',type:'start'},
-    {name:'Cirebon',time:'09:05 · Transit 3 menit',type:'mid'},
-    {name:'Purwokerto',time:'10:45 · Transit 3 menit',type:'mid'},
-    {name:'Yogyakarta',time:'12:05 · Tiba',type:'end'}
-  ],
-  'Taksaka Pagi': [
-    {name:'Jakarta Gambir',time:'08:30 · Berangkat',type:'start'},
-    {name:'Yogyakarta',time:'14:00 · Tiba',type:'end'}
-  ],
-  'Senja Utama YK': [
-    {name:'Jakarta Gambir',time:'10:15 · Berangkat',type:'start'},
-    {name:'Cirebon',time:'12:20 · Transit 5 menit',type:'mid'},
-    {name:'Yogyakarta',time:'16:20 · Tiba',type:'end'}
-  ],
-  'Lodaya Pagi': [
-    {name:'Jakarta Gambir',time:'06:00 · Berangkat',type:'start'},
-    {name:'Bandung',time:'08:30 · Transit 5 menit',type:'mid'},
-    {name:'Tasikmalaya',time:'10:10 · Transit 3 menit',type:'mid'},
-    {name:'Yogyakarta',time:'14:30 · Tiba',type:'end'}
-  ],
-  'Gajayana': [
-    {name:'Jakarta Gambir',time:'14:00 · Berangkat',type:'start'},
-    {name:'Cirebon',time:'16:05 · Transit 3 menit',type:'mid'},
-    {name:'Yogyakarta',time:'19:45 · Tiba',type:'end'}
-  ]
-};
  
 function buildSeats(){
   var map=document.getElementById('seat-map');
+  if(!map) return; // Mencegah error jika element belum ada
   map.innerHTML='';
   for(var n=1;n<=8;n++){
     var row=document.createElement('div');
@@ -560,9 +748,12 @@ function buildSeats(){
 function toggleSeat(id,el){
   if(el.classList.contains('taken')) return;
   var idx=selSeats.indexOf(id);
-  if(idx>=0){selSeats.splice(idx,1);}
+  if(idx>=0){
+    selSeats.splice(idx,1);
+  }
   else{
-    if(selSeats.length>=2) selSeats.shift();
+    // Batas pilih kursi mengikuti jumlah variabel 'pax' secara dinamis
+    if(selSeats.length >= pax) selSeats.shift();
     selSeats.push(id);
   }
   buildSeats();
@@ -570,13 +761,26 @@ function toggleSeat(id,el){
  
 function updateSeatUI(){
   var txt=selSeats.length>0?selSeats.join(', '):'—';
-  document.getElementById('s-seats').textContent=txt;
-  document.getElementById('s2-seats').textContent=txt;
-  document.getElementById('tck-seats').textContent=txt;
-  if(selSeats[0]) document.getElementById('p1-seat').textContent=selSeats[0];
-  if(selSeats[1]) document.getElementById('p2-seat').textContent=selSeats[1];
+  
+  var elSSeats = document.getElementById('s-seats');
+  var elS2Seats = document.getElementById('s2-seats');
+  var elTckSeats = document.getElementById('tck-seats');
+  
+  if(elSSeats) elSSeats.textContent=txt;
+  if(elS2Seats) elS2Seats.textContent=txt;
+  if(elTckSeats) elTckSeats.textContent=txt;
+  
+  var elP1 = document.getElementById('p1-seat');
+  var elP2 = document.getElementById('p2-seat');
+  
+  if(selSeats[0] && elP1) elP1.textContent=selSeats[0];
+  if(selSeats[1] && elP2) elP2.textContent=selSeats[1];
+  
+  // Tombol lanjut baru aktif jika jumlah kursi yang dipilih PAS dengan jumlah pax
   var btn=document.getElementById('btn-lanjut-kursi');
-  btn.disabled=selSeats.length!==2;
+  if (btn) {
+      btn.disabled = (selSeats.length !== pax);
+  }
 }
  
 function switchGerbong(el,n){
@@ -594,7 +798,50 @@ function showSuccess(){
   goPage('page-success',5);
   document.querySelectorAll('.tstep').forEach(s=>{s.classList.remove('active');s.classList.add('done');});
 }
- 
+
+function goPage(pageId, stepNumber) {
+    // 1. Paksa sembunyikan halaman tiket utama
+    var ticketPage = document.getElementById('page-tickets');
+    if (ticketPage) {
+        ticketPage.style.display = 'none';
+    }
+
+    // 2. Paksa sembunyikan semua elemen pembungkus ber-class .page
+    document.querySelectorAll('.page').forEach(page => {
+        page.style.display = 'none';
+    });
+
+    // 3. Paksa sembunyikan tombol "Pilih Kursi" jingga itu sendiri agar tidak ikut terbawa
+    var mainBtn = document.getElementById('btn-pilih-kereta');
+    if (mainBtn && mainBtn.parentElement) {
+        mainBtn.parentElement.style.display = 'none'; 
+    }
+
+    // 4. Tampilkan halaman tujuan (page-seats)
+    var targetPage = document.getElementById(pageId);
+    if (targetPage) {
+        targetPage.style.display = 'block'; // Diubah menjadi block penuh
+    } else {
+        console.error("Halaman dengan ID '" + pageId + "' tidak ditemukan!");
+    }
+
+    // 5. Gambar ulang denah kursi
+    if (pageId === 'page-seats' && typeof buildSeats === 'function') {
+        buildSeats();
+    }
+
+    // 6. Update indikator step di bagian atas bar
+    document.querySelectorAll('.tstep').forEach((step, index) => {
+        if (index < stepNumber) {
+            step.classList.add('active');
+        } else {
+            step.classList.remove('active');
+        }
+    });
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
 setInterval(function(){
   if(cdSecs<=0) return;
   cdSecs--;
