@@ -18,23 +18,18 @@ class AdminJadwalController extends Controller
 
     // 2. Memproses simpan data jadwal dari modal pop-up (Create)
     public function store(Request $request)
-    {
-        $request->validate([
-            'nama_kereta'     => 'required',
-            'kelas'           => 'required',
+    {$request->validate([
             'stasiun_asal'    => 'required',
             'stasiun_tujuan'  => 'required',
             'waktu_berangkat' => 'required',
             'harga'           => 'required|numeric',
         ]);
 
-        Jadwal::create([
-            'nama_kereta'     => $request->nama_kereta,
-            'kelas'           => $request->kelas,
-            'asal'            => $request->stasiun_asal,     // Masuk ke kolom 'asal'
-            'tujuan'          => $request->stasiun_tujuan,   // Masuk ke kolom 'tujuan'
-            'waktu_berangkat' => $request->waktu_berangkat,  // Masuk ke kolom 'waktu_berangkat'
-            'harga_ticket'    => $request->harga,            // Masuk ke kolom 'harga_ticket'
+       Jadwal::create([
+            'asal'               => $request->asal,
+            'tujuan'             => $request->tujuan,
+            'waktu_keberangkatan'=> $request->waktu_keberangkatan,
+            'harga_tiket'        => $request->harga_tiket,
         ]);
 
         return redirect('/admin/jadwal')->with('success', 'Jadwal berhasil ditambahkan!');
