@@ -14,15 +14,17 @@ Route::post('/login', [AuthController::class, 'login']);
 // Logout
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// ========================================================
-// JALUR AKSES DASHBOARD PENUMPANG
-// ========================================================
 
-// Dashboard Penumpang (Menggunakan JadwalController agar data jadwal dinamis)
-Route::get('/dashboard', [JadwalController::class, 'index'])->name('dashboard');
+// ========================================================
+// JALUR AKSES DASHBOARD PENUMPANG (SUDAH DIPROTEKSI LOGIN)
+// ========================================================
+Route::middleware(['auth'])->group(function () {
+    // Dashboard Penumpang (Menggunakan JadwalController agar data jadwal dinamis)
+    Route::get('/dashboard', [JadwalController::class, 'index'])->name('dashboard');
 
-// Jalur untuk memproses kiriman form bukti transfer dari penumpang
-Route::post('/pembayaran/kirim', [PenumpangController::class, 'kirimPembayaran']);
+    // Jalur untuk memproses kiriman form bukti transfer dari penumpang
+    Route::post('/pembayaran/kirim', [PenumpangController::class, 'kirimPembayaran']);
+});
 
 
 // ========================================================
@@ -42,4 +44,4 @@ Route::put('/admin/jadwal/{id}', [AdminJadwalController::class, 'update']);
 
 // Jalur untuk melihat data pembayaran/tiket dan mengubah statusnya
 Route::get('/admin/pembayaran', [AdminJadwalController::class, 'pembayaranIndex']);
-Route::patch('/admin/pembayaran/{id}', [AdminJadwalController::class, 'updateStatusPembayaran']);
+Route::patch('/admin/pembayaran/{id}', [AdminJadwalController::class, 'updateStatusPembayaran']);                                                                                                                                                                       

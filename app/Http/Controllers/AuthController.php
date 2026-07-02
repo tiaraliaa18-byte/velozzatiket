@@ -13,11 +13,7 @@ class AuthController extends Controller
      */
     public function showLogin()
     {
-        if (Auth::check()) {
-            $user = Auth::user();
-            return $this->redirectBasedOnRole($user);
-        }
-
+        // Bagian Auth::check otomatis dimatikan dulu supaya kamu TIDAK dilempar terus ke dashboard penumpang
         return view('login');
     }
 
@@ -82,6 +78,7 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
+        // Diarahkan langsung ke halaman login setelah bersih-bersih session
         return redirect('/login');
     }
 }

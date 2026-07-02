@@ -4,35 +4,525 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Admin - Kelola Jadwal Velozza</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100 font-sans">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-    <div class="flex h-screen">
-        <div class="w-64 bg-blue-900 text-white p-6 shadow-lg">
-            <h1 class="text-2xl font-bold tracking-wider mb-8">VELOZZA</h1>
-            <nav class="space-y-4">
-                <a href="{{ url('/admin/jadwal') }}" class="block py-2.5 px-4 rounded bg-blue-800 font-semibold">📅 Kelola Jadwal</a>
-                <a href="{{ url('/admin/pembayaran') }}" class="block py-2.5 px-4 rounded hover:bg-blue-800 transition">🎟️ Data Tiket</a>
+    <style>
+        /* 🎨 GLOBAL & VARIABEL WARNA VELOZZA */
+        :root {
+            --bg-utama: #f8fafc;        /* Soft gray premium untuk background luar */
+            --warna-sidebar-start: #991b1b;
+            --warna-sidebar-mid-1: #b91c1c;
+            --warna-sidebar-mid-2: #dc2626;
+            --warna-sidebar-end: #ea580c;
+            --text-judul: #1e293b;
+            --text-muted: #64748b;
+            --merah-velozza: #e11d48;
+            --merah-hover: #be123c;
+            --oranye-velozza: #ea580c;
+            --oranye-hover: #c2410c;
+            --warna-border-tabel: #cbd5e1; /* Warna garis abu-abu rapi untuk grid */
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-utama);
+            color: #334155;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* 📦 LAYOUT STRUKTUR UTAMA */
+        .dashboard-container {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* 🚪 SIDEBAR VELOZZA */
+        .sidebar {
+            width: 260px;
+            background: linear-gradient(to bottom, 
+                var(--warna-sidebar-start) 0%, 
+                var(--warna-sidebar-mid-1) 45%, 
+                var(--warna-sidebar-mid-2) 70%, 
+                var(--warna-sidebar-end) 100%);
+            padding: 30px 24px;
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.08);
+            display: flex;
+            flex-direction: column;
+            color: #ffffff;
+            flex-shrink: 0;
+        }
+
+        .sidebar-brand {
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            margin-bottom: 40px;
+        }
+
+        .sidebar-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .menu-link {
+            display: block;
+            padding: 12px 16px;
+            border-radius: 8px;
+            color: rgba(255, 255, 255, 0.85);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .menu-link.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+        }
+
+        .menu-link:hover:not(.active) {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            transform: translateX(4px);
+        }
+
+        .logout-btn {
+            width: 100%;
+            text-align: left;
+            background: none;
+            border: none;
+            padding: 12px 16px;
+            border-radius: 8px;
+            color: #fca5a5;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .logout-btn:hover {
+            background-color: rgba(153, 27, 27, 0.4);
+            color: #ffffff;
+        }
+
+        /* 💻 KONTEN UTAMA DOCK */
+        .main-content {
+            flex-grow: 1;
+            padding: 40px;
+            overflow-y: auto;
+        }
+
+        /* 🔔 ALERT BANNER NOTIFIKASI */
+        .alert {
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .alert-success {
+            background-color: #f0fdf4;
+            border-left: 4px solid #22c55e;
+            color: #166534;
+        }
+        .alert-danger {
+            background-color: #fef2f2;
+            border-left: 4px solid #ef4444;
+            color: #991b1b;
+        }
+        .alert-list {
+            list-style-position: inside;
+            margin-top: 4px;
+        }
+
+        /* 🔝 TOP BAR (JUDUL & TOMBOL TAMBAH) */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        .top-bar h2 {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-judul);
+        }
+
+        .btn-tambah {
+            background-color: var(--merah-velozza);
+            color: #ffffff;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(225, 29, 72, 0.25);
+            transition: all 0.2s ease;
+        }
+
+        .btn-tambah:hover {
+            background-color: var(--merah-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(225, 29, 72, 0.35);
+        }
+
+        /* 📊 CARD & TABEL MANAJEMEN JADWAL DENGAN GRID GARIS */
+        .table-card {
+            background-color: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+            overflow: hidden;
+            border: 1px solid var(--warna-border-tabel);
+        }
+
+        .main-table {
+            width: 100%;
+            border-collapse: collapse; /* Menyatukan border agar garis tidak double */
+            text-align: left;
+        }
+
+        /* Header Tabel Custom Bernuansa Soft Premium Pink */
+        .main-table thead tr {
+            background-color: #ffeeee;
+        }
+
+        /* Garis Vertikal Pembatas Kolom di Header */
+        .main-table th {
+            padding: 16px 24px;
+            color: #991b1b;
+            font-weight: 700;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            border-bottom: 2px solid #fca5a5;
+            border-right: 1px solid var(--warna-border-tabel);
+        }
+
+        /* Hilangkan garis vertikal paling kanan di header */
+        .main-table th:last-child {
+            border-right: none;
+        }
+
+        /* Garis Pembatas Kolom & Baris Vertikal-Horizontal di Body */
+        .main-table td {
+            padding: 18px 24px;
+            font-size: 14px;
+            color: #475569;
+            vertical-align: middle;
+            border-bottom: 1px solid var(--warna-border-tabel);
+            border-right: 1px solid var(--warna-border-tabel);
+        }
+
+        /* Hilangkan garis vertikal paling kanan di isi body */
+        .main-table td:last-child {
+            border-right: none;
+        }
+
+        /* Efek Hover Baris */
+        .main-table tbody tr {
+            transition: background-color 0.2s ease;
+        }
+        .main-table tbody tr:hover {
+            background-color: #f8fafc;
+        }
+
+        /* Detail Komponen Tabel */
+        .kereta-nama {
+            font-weight: 700;
+            color: #1e293b;
+        }
+        .kereta-kelas {
+            display: block;
+            font-size: 11px;
+            color: #94a3b8;
+            font-weight: 400;
+            text-transform: capitalize;
+            margin-top: 2px;
+        }
+
+        .rute-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .badge-asal {
+            background-color: #fff7ed;
+            color: #c2410c;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge-tujuan {
+            background-color: #fef2f2;
+            color: #b91c1c;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .rute-panah {
+            color: #94a3b8;
+        }
+
+        .durasi-text {
+            font-weight: 600;
+            color: #334155;
+        }
+
+        .harga-text {
+            font-weight: 700;
+            color: #16a34a;
+        }
+
+        .aksi-group {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .btn-edit {
+            background-color: #eab308;
+            color: #ffffff;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(234, 179, 8, 0.2);
+            transition: all 0.2s ease;
+        }
+        .btn-edit:hover {
+            background-color: #ca8a04;
+            transform: translateY(-1px);
+        }
+
+        .btn-hapus {
+            background-color: #ef4444;
+            color: #ffffff;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+            transition: all 0.2s ease;
+        }
+        .btn-hapus:hover {
+            background-color: #dc2626;
+            transform: translateY(-1px);
+        }
+
+        /* 🪟 POPUP MODAL CRUD JADWAL */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+        .modal-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-box {
+            background-color: #ffffff;
+            width: 100%;
+            max-width: 450px;
+            border-radius: 16px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            overflow: hidden;
+            transform: scale(0.95);
+            transition: all 0.3s ease;
+        }
+        .modal-overlay.show .modal-box {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            background: linear-gradient(to right, var(--oranye-velozza), #be123c);
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #ffffff;
+        }
+        .modal-header h3 {
+            font-size: 18px;
+            font-weight: 700;
+        }
+        .btn-close-modal {
+            background: none;
+            border: none;
+            color: #ffffff;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            opacity: 0.8;
+        }
+        .btn-close-modal:hover {
+            opacity: 1;
+        }
+
+        /* FORM DALAM MODAL */
+        .modal-form {
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .form-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #475569;
+        }
+        .form-control {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #334155;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .form-control:focus {
+            border-color: var(--oranye-velozza);
+            box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.15);
+        }
+        
+        /* Input Spesial Ber-Rupiah */
+        .input-rupiah-wrapper {
+            display: flex;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #cbd5e1;
+        }
+        .rupiah-addon {
+            background-color: #e2e8f0;
+            color: #64748b;
+            padding: 10px 14px;
+            font-size: 14px;
+            font-weight: 600;
+            user-select: none;
+            border-right: 1px solid #cbd5e1;
+        }
+        .input-rupiah-wrapper .form-control {
+            border: none;
+            border-radius: 0;
+        }
+
+        /* Menghilangkan panah input type number */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            padding-top: 16px;
+            border-top: 1px solid #f1f5f9;
+            margin-top: 8px;
+        }
+        .btn-batal {
+            background-color: #e2e8f0;
+            color: #475569;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .btn-batal:hover {
+            background-color: #cbd5e1;
+        }
+        .btn-simpan {
+            background-color: var(--oranye-velozza);
+            color: #ffffff;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(234, 88, 12, 0.2);
+            transition: background-color 0.2s;
+        }
+        .btn-simpan:hover {
+            background-color: var(--oranye-hover);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-container">
+        
+        <div class="sidebar">
+            <div class="sidebar-brand">VELOZZA</div>
+            <nav class="sidebar-menu" style="flex-grow: 1;">
+                <a href="{{ url('/admin/jadwal') }}" class="menu-link active">📅 Kelola Jadwal</a>
+                <a href="{{ url('/admin/pembayaran') }}" class="menu-link">🎟️ Data Tiket</a>
+            </nav>
+            <div>
                 <form action="{{ route('logout') }}" method="POST">
                     @csrf
-                    <button type="submit" class="w-full text-left block py-2.5 px-4 rounded hover:bg-blue-800 transition text-red-300 cursor-pointer">
-                        🚪 Logout
-                    </button>
+                    <button type="submit" class="logout-btn">🚪 Logout</button>
                 </form>
-            </nav>
+            </div>
         </div>
 
-        <div class="flex-1 p-10 overflow-y-auto">
+        <div class="main-content">
+            
             @if(session('success'))
-                <div class="mb-4 p-4 bg-green-100 border-l-4 border-green-500 text-green-700 rounded shadow-sm">
+                <div class="alert alert-success">
                     {{ session('success') }}
                 </div>
             @endif
 
             @if($errors->any())
-                <div class="mb-4 p-4 bg-red-100 border-l-4 border-red-500 text-red-700 rounded shadow-sm">
-                    <ul class="list-disc pl-5 text-sm">
+                <div class="alert alert-danger">
+                    <ul class="alert-list">
                         @foreach($errors->all() as $error)
                             <li>{{ $error }}</li>
                         @endforeach
@@ -40,64 +530,66 @@
                 </div>
             @endif
 
-            <div class="flex justify-between items-center mb-8">
-                <h2 class="text-3xl font-bold text-gray-800">Manajemen Jadwal Kereta Api</h2>
-                <button id="openModalBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg font-medium shadow transition cursor-pointer">
-                    ➕ Tambah Jadwal Baru
-                </button>
+            <div class="top-bar">
+                <h2>Manajemen Jadwal Kereta Api</h2>
+                <button id="openModalBtn" class="btn-tambah">➕ Tambah Jadwal Baru</button>
             </div>
 
-            <div class="bg-white rounded-xl shadow-md overflow-hidden">
-                <table class="w-full text-left border-collapse">
+            <div class="table-card">
+                <table class="main-table">
                     <thead>
-                        <tr class="bg-gray-200 text-gray-700 font-semibold text-sm uppercase tracking-wider">
-                            <th class="p-4 border-b">Rute Perjalanan</th>
-                            <th class="p-4 border-b">Waktu Berangkat</th>
-                            <th class="p-4 border-b">Harga</th>
-                            <th class="p-4 border-b text-center">Aksi</th>
+                        <tr>
+                            <th>Nama Kereta</th>
+                            <th>Rute Perjalanan</th>
+                            <th>Waktu Berangkat</th>
+                            <th>Durasi</th>
+                            <th>Harga</th>
+                            <th style="text-align: center;">Aksi</th>
                         </tr>
                     </thead>
-                    <tbody class="text-gray-600 text-sm divide-y divide-gray-100">
+                    <tbody>
                         @forelse($jadwal as $j)
-                            <tr class="hover:bg-gray-50 transition">
-                                <td class="p-4">
-                                    <div class="flex items-center gap-2">
-                                        <span class="bg-blue-100 text-blue-800 px-2.5 py-0.5 rounded-full text-xs font-medium">
-                                            {{ $j->asal }}
-                                        </span>
-                                        <span class="text-gray-400">➔</span>
-                                        <span class="bg-green-100 text-green-800 px-2.5 py-0.5 rounded-full text-xs font-medium">
-                                            {{ $j->tujuan }}
-                                        </span>
+                            <tr>
+                                <td>
+                                    <span class="kereta-nama">{{ $j->nama_kereta }}</span>
+                                    <span class="kereta-kelas">Kelas: {{ $j->kelas ?? '-' }}</span>
+                                </td>
+                                <td>
+                                    <div class="rute-container">
+                                        <span class="badge-asal">{{ $j->asal }}</span>
+                                        <span class="rute-panah">➔</span>
+                                        <span class="badge-tujuan">{{ $j->tujuan }}</span>
                                     </div>
                                 </td>
-                                <td class="p-4">{{ $j->waktu_keberangkatan }}</td>
-                                <td class="p-4 font-medium text-green-600">Rp {{ number_format($j->harga_tiket, 0, ',', '.') }}</td>
-                                <td class="p-4 text-center">
-                                    <div class="flex items-center justify-center gap-2">
+                                <td>{{ $j->waktu_keberangkatan }}</td>
+                                <td class="durasi-text">{{ $j->durasi ?? '-' }} Menit</td>
+                                <td class="harga-text">Rp {{ number_format($j->harga_tiket, 0, ',', '.') }}</td>
+                                <td>
+                                    <div class="aksi-group">
                                         <button type="button"
-                                                class="openEditModalBtn bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1.5 rounded text-xs font-medium transition cursor-pointer shadow"
+                                                class="btn-edit openEditModalBtn"
                                                 data-id="{{ $j->id_jadwal }}"
+                                                data-nama="{{ $j->nama_kereta }}"
+                                                data-kelas="{{ $j->kelas }}"
                                                 data-asal="{{ $j->asal }}"
                                                 data-tujuan="{{ $j->tujuan }}"
                                                 data-waktu="{{ date('Y-m-d\TH:i', strtotime($j->waktu_keberangkatan)) }}"
+                                                data-durasi="{{ $j->durasi }}"
                                                 data-harga="{{ $j->harga_tiket }}">
                                             Edit
                                         </button>
 
-                                        <form action="{{ url('/admin/jadwal/'.$j->id_jadwal) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus jadwal ini?');" class="inline">
+                                        <form action="{{ url('/admin/jadwal/'.$j->id_jadwal) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus jadwal ini?');" style="display: inline;">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded text-xs font-medium transition cursor-pointer shadow">
-                                                Hapus
-                                            </button>
+                                            <button type="submit" class="btn-hapus">Hapus</button>
                                         </form>
                                     </div>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4" class="p-8 text-center text-gray-400 italic">
+                                <td colspan="6" style="padding: 50px 24px; text-align: center; color: #94a3b8; font-style: italic; font-size: 14px; border-right: none;">
                                     Belum ada jadwal kereta yang diinput oleh Admin.
                                 </td>
                             </tr>
@@ -105,30 +597,55 @@
                     </tbody>
                 </table>
             </div>
+
         </div>
     </div>
 
-    <div id="crudModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center hidden z-50">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all scale-95 duration-300">
-            <div class="bg-blue-900 text-white p-4 flex justify-between items-center">
-                <h3 class="text-lg font-bold" id="modalTitle">Tambah Jadwal Kereta Baru</h3>
-                <button id="closeModalBtn" class="text-white hover:text-gray-200 text-xl font-bold cursor-pointer">&times;</button>
+    <div id="crudModal" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 id="modalTitle">Tambah Jadwal Kereta Baru</h3>
+                <button id="closeModalBtn" class="btn-close-modal">&times;</button>
             </div>
             
-            <form id="modalForm" action="{{ url('/admin/jadwal') }}" method="POST" class="p-6 space-y-4">
+            <form id="modalForm" action="{{ url('/admin/jadwal') }}" method="POST" class="modal-form">
                 @csrf
                 <input type="hidden" name="_method" id="formMethod" value="POST">
                 
-                <div>
-                    <label class="block text-gray-700 text-sm font-semibold mb-1">Stasiun Asal:</label>
-                    <select id="stasiun_asal" name="asal" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <div class="form-group">
+                    <label>Nama Kereta:</label>
+                    <select id="nama_kereta" name="nama_kereta" required class="form-control" style="font-weight: 500;">
+                        <option value="" disabled selected> Pilih Nama Kereta </option>
+                        <option value="Anggrek">Anggrek</option>
+                        <option value="Argo">Argo</option>
+                        <option value="Utama">Utama</option>
+                        <option value="Pasundan">Pasundan</option>
+                        <option value="Merapi">Merapi</option>
+                        <option value="Kertajaya">Kertajaya</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Kelas Kereta:</label>
+                    <select id="kelas" name="kelas" required class="form-control" style="font-weight: 500;">
+                        <option value="" disabled selected> Pilih Kelas Kereta </option>
+                        <option value="eksekutif">Eksekutif</option>
+                        <option value="bisnis">Bisnis</option>
+                        <option value="ekonomi">Ekonomi</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Stasiun Asal:</label>
+                    <select id="stasiun_asal" name="asal" required class="form-control">
                         <option value="" disabled selected> Pilih Kota Asal </option>
                         <option value="Bandung">Bandung (BD)</option>
                     </select>
                 </div>
-                <div>
-                    <label class="block text-gray-700 text-sm font-semibold mb-1">Stasiun Tujuan:</label>
-                    <select id="stasiun_tujuan" name="tujuan" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+
+                <div class="form-group">
+                    <label>Stasiun Tujuan:</label>
+                    <select id="stasiun_tujuan" name="tujuan" required class="form-control">
                         <option value="" disabled selected> Pilih Kota Tujuan </option>
                         <option value="Jakarta">Jakarta (GMR)</option>
                         <option value="Jogja">Jogja (YK)</option>
@@ -136,28 +653,28 @@
                         <option value="Bandung">Bandung (BD)</option>
                     </select>
                 </div>
-                <div>
-                    <label class="block text-gray-700 text-sm font-semibold mb-1">Waktu Berangkat:</label>
-                    <input type="datetime-local" id="waktu_keberangkatan" name="waktu_keberangkatan" required 
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+
+                <div class="form-group">
+                    <label>Waktu Berangkat:</label>
+                    <input type="datetime-local" id="waktu_keberangkatan" name="waktu_keberangkatan" required class="form-control">
                 </div>
-                <div>
-                    <label class="block text-gray-700 text-sm font-semibold mb-1">Harga Tiket:</label>
-                    <div class="flex rounded-lg shadow-sm bg-gray-50">
-                        <span class="px-3 py-2 rounded-l-lg border border-r-0 border-gray-300 bg-gray-200 text-gray-500 text-sm flex items-center select-none">
-                            Rp
-                        </span>
-                        <input type="number" id="harga_tiket" name="harga_tiket" placeholder="Masukkan nominal harga" required 
-                               class="w-full px-3 py-2 border border-gray-300 rounded-r-lg bg-white text-gray-700 font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500">
+
+                <div class="form-group">
+                    <label>Durasi Perjalanan (Menit):</label>
+                    <input type="number" id="durasi" name="durasi" required class="form-control" style="font-weight: 500;">
+                </div>
+
+                <div class="form-group">
+                    <label>Harga Tiket:</label>
+                    <div class="input-rupiah-wrapper">
+                        <span class="rupiah-addon">Rp</span>
+                        <input type="number" id="harga_tiket" name="harga_tiket" required class="form-control" style="font-weight: 600;">
                     </div>
                 </div>
-                <div class="flex justify-end space-x-2 pt-2 border-t border-gray-100">
-                    <button type="button" id="cancelModalBtn" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium text-sm transition cursor-pointer">
-                        Batal
-                    </button>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-sm shadow transition cursor-pointer">
-                        Simpan ke Database
-                    </button>
+
+                <div class="modal-footer">
+                    <button type="button" id="cancelModalBtn" class="btn-batal">Batal</button>
+                    <button type="submit" class="btn-simpan">Simpan ke Database</button>
                 </div>
             </form>
         </div>
@@ -175,26 +692,34 @@
         
         const stasiunTujuanSelect = document.getElementById('stasiun_tujuan');
         const hargaTiketInput = document.getElementById('harga_tiket');
+        const durasiInput = document.getElementById('durasi');
 
         let isEditMode = false;
 
+        // Auto-fill Harga dan Durasi berdasarkan Kota Tujuan (Hanya saat Mode Tambah)
         stasiunTujuanSelect.addEventListener('change', function() {
             if (isEditMode) return;
 
             const kotaTujuan = this.value;
             let hargaOtomatis = 0;
+            let durasiOtomatis = 0;
 
             if (kotaTujuan === 'Jakarta') {
                 hargaOtomatis = 150000;
+                durasiOtomatis = 45;
             } else if (kotaTujuan === 'Jogja') {
                 hargaOtomatis = 175000;
+                durasiOtomatis = 55;
             } else if (kotaTujuan === 'Malang') {
                 hargaOtomatis = 450000;
+                durasiOtomatis = 150;
             } else if (kotaTujuan === 'Bandung') {
                 hargaOtomatis = 90000;
+                durasiOtomatis = 30;
             }
 
             hargaTiketInput.value = hargaOtomatis;
+            durasiInput.value = durasiOtomatis;
         });
 
         openBtn.addEventListener('click', () => {
@@ -203,7 +728,7 @@
             modalForm.action = "{{ url('/admin/jadwal') }}";
             formMethod.value = "POST";
             modalForm.reset();
-            modal.classList.remove('hidden');
+            modal.classList.add('show');
         });
 
         document.querySelectorAll('.openEditModalBtn').forEach(button => {
@@ -214,17 +739,20 @@
                 modalForm.action = "{{ url('/admin/jadwal') }}/" + idJadwal;
                 formMethod.value = "PUT";
 
+                document.getElementById('nama_kereta').value = this.getAttribute('data-nama');
+                document.getElementById('kelas').value = this.getAttribute('data-kelas');
                 document.getElementById('stasiun_asal').value = this.getAttribute('data-asal');
                 document.getElementById('stasiun_tujuan').value = this.getAttribute('data-tujuan');
                 document.getElementById('waktu_keberangkatan').value = this.getAttribute('data-waktu');
+                document.getElementById('durasi').value = this.getAttribute('data-durasi');
                 document.getElementById('harga_tiket').value = this.getAttribute('data-harga');
 
-                modal.classList.remove('hidden');
+                modal.classList.add('show');
             });
         });
 
         const closeModal = () => {
-            modal.classList.add('hidden');
+            modal.classList.remove('show');
         };
 
         closeBtn.addEventListener('click', closeModal);
