@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminJadwalController;
 use App\Http\Controllers\JadwalController; // Controller untuk jadwal dashboard penumpang
 use App\Http\Controllers\PenumpangController; // Controller untuk handling pembayaran penumpang
+use App\Http\Controllers\PemesananController;
 
 // 1. Jalur Utama & Login
 Route::get('/', [AuthController::class, 'showLogin']);
@@ -44,4 +45,7 @@ Route::put('/admin/jadwal/{id}', [AdminJadwalController::class, 'update']);
 
 // Jalur untuk melihat data pembayaran/tiket dan mengubah statusnya
 Route::get('/admin/pembayaran', [AdminJadwalController::class, 'pembayaranIndex']);
-Route::patch('/admin/pembayaran/{id}', [AdminJadwalController::class, 'updateStatusPembayaran']);                                                                                                                                                                       
+Route::patch('/admin/pembayaran/{id}', [AdminJadwalController::class, 'updateStatusPembayaran']);                                                                                                                                                                                                                                              
+
+// kirimkan ke fungsi 'store' di PemesananController"
+Route::post('/pesan-tiket', [PemesananController::class, 'store']);

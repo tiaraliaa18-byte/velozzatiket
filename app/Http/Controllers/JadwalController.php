@@ -3,17 +3,26 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-// 🛠️ TAMBAHKAN BARIS INI BIAR MODEL JADWAL DIKENAL OLEH LARAVEL:
 use App\Models\Jadwal; 
+use Illuminate\Support\Facades\DB; 
 
 class JadwalController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        // Ambil semua data jadwal dari database MySQL
+        // 1. Ambil semua data jadwal untuk ditampilkan di kartu kereta
         $daftarJadwal = Jadwal::all();
         
-        // Kirim data tersebut ke halaman dashboard penumpang kamu
-        return view('dashboard', compact('daftarJadwal'));
+        // 2. Tangkap ID Jadwal yang dikirim saat user memilih/mencari kereta
+        $idJadwal = $request->input('id_jadwal'); 
+
+        // 3. Query simpel & aman: Ambil no_kursi dari tabel pemesanan berdasarkan id_jadwal
+        $kursiTerisi = DB::table('pemesanan') 
+            ->where('id_jadwal', $idJadwal)
+            ->pluck('no_kursi') // Mengambil kolom no_kursi sesuai phpMyAdmin kamu
+            ->toArray();
+
+        // 4. Kirim data ke blade
+        return view('dashboard', compact('daftarJadwal', 'kursiTerisi'));
     }
 }
