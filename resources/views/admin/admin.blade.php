@@ -561,7 +561,7 @@
                                         <span class="badge-tujuan">{{ $j->tujuan }}</span>
                                     </div>
                                 </td>
-                                <td>{{ $j->waktu_keberangkatan }}</td>
+                                <td>{{ date('H:i', strtotime($j->waktu_keberangkatan)) }}</td>
                                 <td class="durasi-text">{{ $j->durasi ?? '-' }} Menit</td>
                                 <td class="harga-text">Rp {{ number_format($j->harga_tiket, 0, ',', '.') }}</td>
                                 <td>
@@ -573,7 +573,7 @@
                                                 data-kelas="{{ $j->kelas }}"
                                                 data-asal="{{ $j->asal }}"
                                                 data-tujuan="{{ $j->tujuan }}"
-                                                data-waktu="{{ date('Y-m-d\TH:i', strtotime($j->waktu_keberangkatan)) }}"
+                                                data-waktu="{{ date('H:i', strtotime($j->waktu_keberangkatan)) }}"
                                                 data-durasi="{{ $j->durasi }}"
                                                 data-harga="{{ $j->harga_tiket }}">
                                             Edit
@@ -656,7 +656,7 @@
 
                 <div class="form-group">
                     <label>Waktu Berangkat:</label>
-                    <input type="datetime-local" id="waktu_keberangkatan" name="waktu_keberangkatan" required class="form-control">
+                    <input type="time" id="waktu_keberangkatan" name="waktu_keberangkatan" required class="form-control">
                 </div>
 
                 <div class="form-group">
@@ -690,37 +690,98 @@
         const modalForm = document.getElementById('modalForm');
         const formMethod = document.getElementById('formMethod');
         
+        const namaKeretaSelect = document.getElementById('nama_kereta');
+        const kelasSelect = document.getElementById('kelas');
         const stasiunTujuanSelect = document.getElementById('stasiun_tujuan');
         const hargaTiketInput = document.getElementById('harga_tiket');
         const durasiInput = document.getElementById('durasi');
 
         let isEditMode = false;
 
-        // Auto-fill Harga dan Durasi berdasarkan Kota Tujuan (Hanya saat Mode Tambah)
-        stasiunTujuanSelect.addEventListener('change', function() {
+        // ==========================================
+        // TABEL REFERENSI HARGA & DURASI
+        // Struktur: tabelHarga[namaKereta][kelas][tujuan] = { harga, durasi }
+        // Kelas pakai huruf kecil karena value dropdown "kelas" juga huruf kecil
+        // Silakan sesuaikan angka-angka di bawah dengan harga real kamu
+        // ==========================================
+        // Durasi (menit) per kereta+tujuan — biasanya sama untuk semua kelas
+        // karena rangkaian & rute sama, cuma harga yang beda per kelas.
+        // Silakan sesuaikan kalau jadwal real kamu beda.
+        const durasiRute = {
+            'Anggrek':   { Jakarta: 195, Jogja: 435, Malang: 690, Bandung: 40 },
+            'Argo':      { Jakarta: 175, Jogja: 405, Malang: 660, Bandung: 35 },
+            'Utama':     { Jakarta: 185, Jogja: 420, Malang: 675, Bandung: 40 },
+            'Pasundan':  { Jakarta: 205, Jogja: 450, Malang: 705, Bandung: 45 },
+            'Merapi':    { Jakarta: 200, Jogja: 440, Malang: 695, Bandung: 42 },
+            'Kertajaya': { Jakarta: 210, Jogja: 460, Malang: 720, Bandung: 50 }
+        };
+
+        // Helper: gabungin harga (angka) + durasi (dari durasiRute) jadi { harga, durasi }
+        function buatBaris(namaKereta, harga) {
+            const durasi = durasiRute[namaKereta];
+            const hasil = {};
+            for (const tujuan in harga) {
+                hasil[tujuan] = { harga: harga[tujuan], durasi: durasi[tujuan] };
+            }
+            return hasil;
+        }
+
+        const tabelHarga = {
+            'Anggrek': {
+                'ekonomi':   buatBaris('Anggrek', { Jakarta: 150000, Jogja: 165000, Malang: 400000, Bandung: 80000 }),
+                'bisnis':    buatBaris('Anggrek', { Jakarta: 220000, Jogja: 240000, Malang: 470000, Bandung: 100000 }),
+                'eksekutif': buatBaris('Anggrek', { Jakarta: 300000, Jogja: 320000, Malang: 550000, Bandung: 120000 })
+            },
+            'Argo': {
+                'ekonomi':   buatBaris('Argo', { Jakarta: 160000, Jogja: 175000, Malang: 420000, Bandung: 85000 }),
+                'bisnis':    buatBaris('Argo', { Jakarta: 250000, Jogja: 270000, Malang: 480000, Bandung: 105000 }),
+                'eksekutif': buatBaris('Argo', { Jakarta: 350000, Jogja: 370000, Malang: 580000, Bandung: 130000 })
+            },
+            'Utama': {
+                'ekonomi':   buatBaris('Utama', { Jakarta: 155000, Jogja: 170000, Malang: 410000, Bandung: 82000 }),
+                'bisnis':    buatBaris('Utama', { Jakarta: 240000, Jogja: 260000, Malang: 460000, Bandung: 98000 }),
+                'eksekutif': buatBaris('Utama', { Jakarta: 340000, Jogja: 360000, Malang: 560000, Bandung: 125000 })
+            },
+            'Pasundan': {
+                'ekonomi':   buatBaris('Pasundan', { Jakarta: 140000, Jogja: 150000, Malang: 380000, Bandung: 70000 }),
+                'bisnis':    buatBaris('Pasundan', { Jakarta: 210000, Jogja: 225000, Malang: 440000, Bandung: 90000 }),
+                'eksekutif': buatBaris('Pasundan', { Jakarta: 290000, Jogja: 310000, Malang: 520000, Bandung: 110000 })
+            },
+            'Merapi': {
+                'ekonomi':   buatBaris('Merapi', { Jakarta: 145000, Jogja: 155000, Malang: 390000, Bandung: 75000 }),
+                'bisnis':    buatBaris('Merapi', { Jakarta: 215000, Jogja: 230000, Malang: 450000, Bandung: 95000 }),
+                'eksekutif': buatBaris('Merapi', { Jakarta: 295000, Jogja: 315000, Malang: 530000, Bandung: 115000 })
+            },
+            'Kertajaya': {
+                'ekonomi':   buatBaris('Kertajaya', { Jakarta: 135000, Jogja: 145000, Malang: 370000, Bandung: 65000 }),
+                'bisnis':    buatBaris('Kertajaya', { Jakarta: 205000, Jogja: 220000, Malang: 430000, Bandung: 88000 }),
+                'eksekutif': buatBaris('Kertajaya', { Jakarta: 280000, Jogja: 300000, Malang: 510000, Bandung: 108000 })
+            }
+        };
+
+        // Auto-fill Harga dan Durasi berdasarkan Nama Kereta + Kelas + Tujuan
+        // (Hanya saat Mode Tambah, bukan saat Edit)
+        function updateHargaOtomatis() {
             if (isEditMode) return;
 
-            const kotaTujuan = this.value;
-            let hargaOtomatis = 0;
-            let durasiOtomatis = 0;
+            const namaKereta = namaKeretaSelect.value;
+            const kelas = kelasSelect.value;
+            const tujuan = stasiunTujuanSelect.value;
 
-            if (kotaTujuan === 'Jakarta') {
-                hargaOtomatis = 150000;
-                durasiOtomatis = 45;
-            } else if (kotaTujuan === 'Jogja') {
-                hargaOtomatis = 175000;
-                durasiOtomatis = 55;
-            } else if (kotaTujuan === 'Malang') {
-                hargaOtomatis = 450000;
-                durasiOtomatis = 150;
-            } else if (kotaTujuan === 'Bandung') {
-                hargaOtomatis = 90000;
-                durasiOtomatis = 30;
+            const data = tabelHarga[namaKereta]?.[kelas]?.[tujuan];
+
+            if (data) {
+                hargaTiketInput.value = data.harga;
+                durasiInput.value = data.durasi;
+            } else {
+                hargaTiketInput.value = '';
+                durasiInput.value = '';
             }
+        }
 
-            hargaTiketInput.value = hargaOtomatis;
-            durasiInput.value = durasiOtomatis;
-        });
+        namaKeretaSelect.addEventListener('change', updateHargaOtomatis);
+        kelasSelect.addEventListener('change', updateHargaOtomatis);
+        stasiunTujuanSelect.addEventListener('change', updateHargaOtomatis);
 
         openBtn.addEventListener('click', () => {
             isEditMode = false;
