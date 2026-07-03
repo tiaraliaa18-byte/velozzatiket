@@ -185,21 +185,27 @@ body {
   transition: all .2s;
   box-shadow: 0 4px 16px rgba(214,40,40,0.35);
 }
-.btn-pilih-kursi-kamu {
-    width: 100%;
-    padding: 15px;
-    background: #ffb085; /* Warna peach pudar bawaan */
-    border: none;
-    border-radius: 10px;
-    color: #ffffff;
-    font-weight: bold;
-    cursor: not-allowed; /* Menunjukkan bahwa belum bisa diklik */
-    transition: all 0.3s ease; /* Biar ada efek transisi halus saat berubah warna */
-}
-.btn-pilih-kursi-kamu:not([disabled]) {
-    background: #ff5e3a; /* Warna jingga menyala khas Velozza kamu */
+/* Styling tombol agar proporsional */
+#btn-pilih-kereta {
+    width: 100%;             /* Mengikuti lebar container */
+    max-width: 4000px;        /* Agar tidak terlalu lebar di layar besar */
+    padding: 15px;           /* Ruang di dalam tombol agar terlihat tebal */
+    background-color: #e04f26;
+    color: white; 
+    border: none; 
+    border-radius: 8px; 
+    font-weight: bold; 
+    font-size: 16px;         /* Ukuran font agar mudah dibaca */
     cursor: pointer;
-    box-shadow: 0 4px 12px rgba(255, 94, 58, 0.2);
+    margin: 20px auto;       /* Membuat tombol ke tengah */
+    display: block;          /* Memastikan tombol tidak menjadi elemen inline */
+}
+
+/* Memastikan container pembungkus tombol rapi */
+#btn-pilih-kursi-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
 }
 .btn-search:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(214,40,40,0.45); }
 .btn-search:active { transform: translateY(0); }
@@ -333,12 +339,25 @@ body {
   overflow: hidden;
 }
 
+.train-list-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Memberi jarak antar kartu */
+    padding: 20px 0;
+}
+
 /* Kontainer daftar kartu kereta agar rapi berurutan ke bawah */
 #train-list-container {
     display: flex;
     flex-direction: column;
     gap: 15px;
     width: 100%;
+}
+
+.train-card.selected {
+    border: 2px solid #e04f26 !important; /* Warna merah sesuai tombol Cari Tiket */
+    background-color: #fffaf7;            /* Opsional: beri warna latar belakang lembut */
+    box-shadow: 0 4px 12px rgba(224, 79, 38, 0.2);
 }
 
 .train-card::before {
@@ -555,6 +574,19 @@ body {
   transition: all .15s;
 }
 .btn-outline:hover { background: var(--red-soft); }
+
+.btn-custom-pilih {
+    background-color: #ffb07c; 
+    color: white; 
+    width: 100%; 
+    max-width: 400px; /* Biarkan tombol tidak terlalu lebar */
+    border: none; 
+    padding: 12px; 
+    font-weight: bold; 
+    border-radius: 8px; 
+    cursor: pointer;
+    margin: 20px auto; /* Membuat tombol berada di tengah */
+}
  
 /* ─── FORM ─── */
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
