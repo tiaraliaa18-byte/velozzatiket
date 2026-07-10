@@ -11,11 +11,9 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('jadwal', function (Blueprint $table) {
-            // Tambahkan pengecekan ini:
-            if (!Schema::hasColumn('jadwal', 'durasi')) {
-                $table->integer('durasi')->after('waktu_keberangkatan');
-            }
+        Schema::table('penumpang', function (Blueprint $table) {
+            $table->string('jenis_kelamin')->nullable();
+            $table->date('tgl_lahir')->nullable();
         });
     }
 
@@ -24,8 +22,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('jadwal', function (Blueprint $table) {
-            $table->dropColumn('durasi');
+        Schema::table('penumpang', function (Blueprint $table) {
+            //
         });
     }
 };

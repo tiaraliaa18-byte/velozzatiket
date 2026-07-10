@@ -8,6 +8,9 @@ class Pembayaran extends Model
 {
     protected $table = 'pembayaran'; 
     protected $primaryKey = 'id_pembayaran'; 
+    public $incrementing = true;
+    protected $keyType = 'int';
+    public $timestamps = false;
 
     protected $fillable = [
         'id_pemesanan',

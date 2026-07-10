@@ -8,23 +8,32 @@ class Pemesanan extends Model
 {
     protected $table = 'pemesanan';
     protected $primaryKey = 'id_pemesanan';
+    public $incrementing = true;
+    protected $keyType = 'int';
+    public $timestamps = false;
 
     protected $fillable = [
+        'kode_booking',
         'id_user',
-        'id_penumpang',
         'id_jadwal',
-        'no_kursi',
-        'status_pemesanan',
+        'total_harga',
+        'status_pembayaran',
+        'tanggal_pemesanan',
+        'tanggal_keberangkatan',
+        'metode_pembayaran',
+        'email_pemesan',
+        'hp_pemesan',
+        'expired_at',
+    ];
+
+    protected $casts = [
+        'tanggal_pemesanan' => 'datetime',
+        'expired_at' => 'datetime',
     ];
 
     public function user()
     {
         return $this->belongsTo(User::class, 'id_user', 'id_user');
-    }
-
-    public function penumpang()
-    {
-        return $this->belongsTo(Penumpang::class, 'id_penumpang', 'id_penumpang');
     }
 
     public function jadwal()
@@ -34,7 +43,7 @@ class Pemesanan extends Model
 
     public function tiket()
     {
-        return $this->hasOne(Tiket::class, 'id_pemesanan', 'id_pemesanan');
+        return $this->hasMany(Tiket::class, 'id_pemesanan', 'id_pemesanan');
     }
 
     public function pembayaran()

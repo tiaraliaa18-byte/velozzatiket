@@ -6,22 +6,28 @@ use Illuminate\Database\Eloquent\Model;
 
 class Tiket extends Model
 {
-    protected $primaryKey = 'id_tiket'; // sesuaikan dengan nama PK di tabel kamu
+    protected $table = 'tiket';
+    protected $primaryKey = 'id_tiket';
+    public $incrementing = true;
+    protected $keyType = 'int';
+    public $timestamps = false;
 
     protected $fillable = [
         'id_pemesanan',
-        'id_jadwal',
-        // kolom lain sesuaikan
+        'id_penumpang',
+        'no_kursi',
+        'kode_tiket',
+        'harga_satuan',
+        'kelas_kursi',
     ];
 
-    public function pemesanan() 
+    public function pemesanan()
     {
         return $this->belongsTo(Pemesanan::class, 'id_pemesanan', 'id_pemesanan');
     }
 
-    // Tambahkan relasi ke Pembayaran
-    public function pembayaran()
+    public function penumpang()
     {
-        return $this->hasOne(Pembayaran::class, 'id_tiket', 'id_tiket');
+        return $this->belongsTo(Penumpang::class, 'id_penumpang', 'id_penumpang');
     }
 }
