@@ -38,9 +38,14 @@
                 </div>
 
                 <div class="form-group">
-                    <div class="label-flex">
-                        <label for="password">Kata Sandi</label>
-                        <a href="#" class="forgot-link">Lupa Sandi?</a>
+                    <div class="label-flex" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                        <label for="password" style="margin-bottom: 0;">Kata Sandi</label>
+                        <a href="{{ route('password.request') }}" 
+                        style="color: #dc2626; font-weight: bold; text-decoration: none; font-size: 0.85rem;" 
+                        onmouseover="this.style.textDecoration='underline'" 
+                        onmouseout="this.style.textDecoration='none'">
+                        Lupa Sandi?
+                        </a>
                     </div>
                     <input type="password" id="password" name="password" value="admin123" required placeholder="••••••••">
                 </div>

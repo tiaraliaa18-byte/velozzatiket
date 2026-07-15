@@ -12,6 +12,8 @@ class User extends Authenticatable
 
     // 🌟 1. WAJIB DISETTING: Beritahu Laravel kalau primary key kamu bernama id_user
     protected $primaryKey = 'id_user';
+    public $incrementing = true;
+    public $timestamps = false;
 
     // 🌟 2. MASUKKAN KOLOM YANG ADA DI DATABASE KAMU
     protected $fillable = [

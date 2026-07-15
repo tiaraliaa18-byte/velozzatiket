@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\{AuthController, JadwalController, PemesananController, PenumpangController, AdminJadwalController};
 use App\Models\Jadwal;
 use App\Http\Controllers\PembayaranController;
+use App\Http\Controllers\ForgotPasswordController;
 
 // 1. PUBLIC ROUTES (Login & Register)
 Route::controller(AuthController::class)->group(function () {
@@ -14,6 +15,15 @@ Route::controller(AuthController::class)->group(function () {
 
     Route::get('/register', 'showRegister')->name('register');
     Route::post('/register', 'register');
+
+    Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+    Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+
+    // Rute untuk menampilkan form reset password
+    Route::get('/reset-password/{token}', [ForgotPasswordController::class, 'showResetForm'])->name('password.reset');
+
+    // Rute untuk memproses perubahan password
+    Route::post('/reset-password', [ForgotPasswordController::class, 'reset'])->name('password.update');
 });
 
 // 2. DASHBOARD PENUMPANG (Middleware Auth)

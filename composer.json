@@ -7,11 +7,10 @@
     "license": "MIT",
     "require": {
         "php": "^8.3",
-<<<<<<< HEAD
+
         "barryvdh/laravel-dompdf": "^3.1",
         "doctrine/dbal": "^4.4",
-=======
->>>>>>> 8acce48d069be2b973df8e293d1e94ad16825811
+
         "laravel/framework": "^13.0",
         "laravel/tinker": "^3.0"
     },
