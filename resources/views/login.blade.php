@@ -52,7 +52,7 @@
         </div>
 
         <div class="login-footer">
-            Belum punya akun penumpang? <a href="#" class="register-link">Daftar Sekarang</a>
+            Belum punya akun penumpang? <a href="{{ route('register') }}" class="register-link">Daftar Sekarang</a>
         </div>
     </div>
 

@@ -15,10 +15,10 @@ class DatabaseSeeder extends Seeder
     {
         // Membuat akun Penumpang (Passenger)
         User::create([
-            'nama' => 'Tiara Penumpang',
+            'name' => 'Tiara Penumpang', // Ubah 'nama' menjadi 'name'
             'email' => 'penumpang@velozza.com',
-            'password' => Hash::make('password123'), // Ini cara enkripsi password yang benar di Laravel
-            'role' => 'passenger', // atau 'penumpang' (sesuaikan dengan enum/kolom di database kamu)
+            'password' => Hash::make('password123'),
+            'role' => 'passenger',
         ]);
 
         // Membuat akun Admin (Opsional)

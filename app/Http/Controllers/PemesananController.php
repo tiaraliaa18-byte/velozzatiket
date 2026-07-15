@@ -35,7 +35,8 @@ class PemesananController extends Controller
 
         $kursiTerisi = Tiket::whereHas('pemesanan', function ($q) use ($id_jadwal, $tanggal) {
                 $q->where('id_jadwal', $id_jadwal)
-                ->where('tanggal_keberangkatan', $tanggal);
+                ->where('tanggal_keberangkatan', $tanggal)
+                ->whereIn('status_pembayaran', ['pending', 'menunggu_konfirmasi', 'lunas']);
             })->pluck('no_kursi')->toArray();
 
         return view('pemesanan.kursi', compact('jadwal', 'pax', 'kursiTerisi'));
@@ -112,7 +113,7 @@ class PemesananController extends Controller
                 'status_pembayaran'     => 'pending',
                 'metode_pembayaran'     => 'Transfer Bank',
                 'tanggal_pemesanan'     => now(),
-                'expired_at'            => now()->addMinutes(30),
+                'expired_at'            => now()->addMinutes(10),
             ]);
 
             foreach ($request->penumpang as $index => $data) {
@@ -148,13 +149,28 @@ class PemesananController extends Controller
     public function konfirmasi($id)
     {
         $pesanan = Pemesanan::with(['tiket.penumpang', 'jadwal'])->findOrFail($id);
-
+ 
+        // Cek apakah pesanan sudah lewat batas waktu tapi belum dibayar
+        if (
+            $pesanan->status_pembayaran === 'pending' &&
+            $pesanan->expired_at &&
+            now()->greaterThan($pesanan->expired_at)
+        ) {
+            $pesanan->update(['status_pembayaran' => 'dibatalkan']);
+            $pesanan->refresh();
+        }
+ 
+        // Kalau statusnya sudah dibatalkan (baru saja atau sebelumnya), tampilkan halaman kadaluarsa
+        if ($pesanan->status_pembayaran === 'dibatalkan') {
+            return view('pemesanan.kadaluarsa', compact('pesanan'));
+        }
+ 
         $sisaDetik = $pesanan->expired_at
             ? max((int) now()->diffInSeconds($pesanan->expired_at, false), 0)
-            : 1800;
-
-        $totalDetikBatas = 1800;
-
+            : 600;
+ 
+        $totalDetikBatas = 600;
+ 
         return view('pemesanan.pembayaran', compact('pesanan', 'sisaDetik', 'totalDetikBatas'));
     }
 
@@ -179,8 +195,6 @@ class PemesananController extends Controller
         ]);
 
         $pesanan->update(['status_pembayaran' => 'menunggu_konfirmasi']);
-
-        Mail::to($pesanan->email_pemesan)->send(new TiketPemesanan($pesanan));   // ← baris baru
 
         return redirect()->route('pemesanan.sukses', $pesanan->id_pemesanan);
     }

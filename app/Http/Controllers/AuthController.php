@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash; // Tambahan: untuk hash password saat register
 use App\Models\User; // Tambahkan ini agar Laravel mengenali model User
 
 class AuthController extends Controller
@@ -44,6 +45,44 @@ class AuthController extends Controller
         return back()->withErrors([
             'email' => 'Email atau password salah.',
         ])->onlyInput('email');
+    }
+
+    /**
+     * Menampilkan halaman register
+     */
+    public function showRegister()
+    {
+        return view('auth.register');
+    }
+
+    /**
+     * Memproses pendaftaran akun baru (khusus penumpang)
+     */
+    public function register(Request $request)
+    {
+        // 1. Validasi inputan form register
+        $validated = $request->validate([
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|string|email|max:255|unique:users,email',
+            'password' => 'required|string|min:8|confirmed', // butuh field password_confirmation
+        ], [
+            'email.unique' => 'Email ini sudah terdaftar. Silakan gunakan email lain atau login.',
+        ]);
+
+        // 2. Simpan user baru ke database
+        $user = User::create([
+            'name'     => $validated['name'],
+            'email'    => $validated['email'],
+            'password' => Hash::make($validated['password']),
+            'role'     => 'passenger', // default role untuk registrasi publik
+        ]);
+
+        // 3. Langsung login-kan user yang baru daftar
+        Auth::login($user);
+        $request->session()->regenerate();
+
+        // 4. Alihkan berdasarkan role (pakai fungsi yang sudah ada)
+        return $this->redirectBasedOnRole($user);
     }
 
     /**

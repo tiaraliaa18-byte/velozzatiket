@@ -106,11 +106,15 @@
     </div>
 
     <script>
-        let cdSecs = {{ $sisaDetik ?? 1800 }};
-        const cdTotal = {{ $totalDetikBatas ?? 1800 }};
+        let cdSecs = {{ $sisaDetik ?? 600 }};
+        const cdTotal = {{ $totalDetikBatas ?? 600 }};
 
-        setInterval(function () {
-            if (cdSecs <= 0) return;
+        const timer = setInterval(function () {
+            if (cdSecs <= 0) {
+                clearInterval(timer);
+                window.location.reload();
+                return;
+            }
             cdSecs--;
             const h = Math.floor(cdSecs / 3600), m = Math.floor((cdSecs % 3600) / 60), s = cdSecs % 60;
             document.getElementById('cdnum').textContent =
