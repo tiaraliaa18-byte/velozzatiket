@@ -15,7 +15,7 @@ class DatabaseSeeder extends Seeder
     {
         // Membuat akun Penumpang (Passenger)
         User::create([
-            'name' => 'Tiara Penumpang', // Ubah 'nama' menjadi 'name'
+            'name' => 'Tiara Penumpang',
             'email' => 'penumpang@velozza.com',
             'password' => Hash::make('password123'),
             'role' => 'passenger',
