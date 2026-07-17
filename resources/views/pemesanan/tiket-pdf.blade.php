@@ -41,6 +41,16 @@
             <td class="value">{{ \Carbon\Carbon::parse($pesanan->jadwal->waktu_keberangkatan)->format('H:i') }}</td>
         </tr>
         <tr>
+            <td class="label">Waktu Pembayaran</td>
+            <td class="value">
+                @if($pesanan->pembayaran?->tanggal_pembayaran)
+                    {{ \Carbon\Carbon::parse($pesanan->pembayaran->tanggal_pembayaran)->translatedFormat('d M Y, H:i') }}
+                @else
+                    -
+                @endif
+            </td>
+        </tr>
+        <tr>
             <td class="label">Total Pembayaran</td>
             <td class="value">Rp {{ number_format($pesanan->total_harga, 0, ',', '.') }}</td>
         </tr>

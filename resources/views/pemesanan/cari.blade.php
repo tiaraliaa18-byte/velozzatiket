@@ -102,7 +102,7 @@
 
                         <div class="w-40 shrink-0">
                             <h3 class="font-bold text-lg text-gray-900">{{ $jadwal->nama_kereta }}</h3>
-                            <span class="inline-block mt-1 text-[11px] font-bold tracking-wide px-2 py-0.5 rounded-full uppercase {{ match($jadwal->kelas) { 'Eksekutif' => 'bg-primary/10 text-primary-dark', 'Bisnis' => 'bg-orange-100 text-orange-700', default => 'bg-blue-100 text-blue-700' } }}">
+                            <span class="inline-block mt-1 text-[11px] font-bold tracking-wide px-2 py-0.5 rounded-full uppercase {{ match(strtolower($jadwal->kelas)) { 'eksekutif' => 'bg-primary/10 text-primary-dark', 'bisnis' => 'bg-orange-100 text-orange-700', 'ekonomi' => 'bg-blue-100 text-blue-700', default => 'bg-gray-100 text-gray-700' } }}">
                                 {{ $jadwal->kelas }}
                             </span>
                         </div>
