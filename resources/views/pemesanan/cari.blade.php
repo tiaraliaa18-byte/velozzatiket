@@ -58,11 +58,9 @@
                                 </select>
                             </div>
 
-                            <button type="submit" class="bg-primary text-white font-bold px-8 py-2.5 rounded-xl hover:bg-primary-dark transition shadow-sm shadow-orange-200">
+                           <button type="submit" class="bg-primary text-white font-bold px-8 py-2.5 rounded-xl hover:bg-primary-dark transition shadow-sm shadow-orange-200">
                                 Cari Tiket
                             </button>
-                    </div>
-                </div>
         </form>
     </div>
 </div>
