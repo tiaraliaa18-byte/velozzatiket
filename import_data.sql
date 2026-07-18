@@ -60,7 +60,7 @@ INSERT INTO `jadwal` (`id_jadwal`, `nama_kereta`, `kelas`, `asal`, `tujuan`, `wa
 (55, 'Utama', 'eksekutif', 'Bandung', 'Malang', '15:00:00', 780, 750000),
 (56, 'Utama', 'eksekutif', 'Bandung', 'Malang', '20:00:00', 780, 750000),
 (57, 'Pasundan', 'bisnis', 'Bandung', 'Jogja', '00:00:00', 480, 350000),
-(58, 'Pasundan', 'bisnis', 'Bandung', 'Yogyakarta', '02:00:00', 480, 350000),
+(58, 'Pasundan', 'bisnis', 'Bandung', 'Jogja', '02:00:00', 480, 350000),
 (59, 'Pasundan', 'bisnis', 'Bandung', 'Jogja', '04:00:00', 480, 350000),
 (60, 'Pasundan', 'bisnis', 'Bandung', 'Jogja', '06:00:00', 480, 350000),
 (61, 'Pasundan', 'bisnis', 'Bandung', 'Jogja', '08:00:00', 480, 350000),

@@ -166,7 +166,7 @@
                             <select name="tujuan" id="input-tujuan" required
                                     class="w-full p-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#a11225]/40 focus:border-[#a11225] transition">
                                 <option value="Jakarta">Jakarta</option>
-                                <option value="Yogyakarta">Yogyakarta</option>
+                                <option value="Jogja">Jogja</option>
                                 <option value="Malang">Malang</option>
                             </select>
                         </div>

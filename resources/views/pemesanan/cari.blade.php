@@ -29,7 +29,7 @@
                                 <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Ke</label>
                                 <select name="tujuan" class="w-full p-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition">
                                     <option value="Jakarta" {{ request('tujuan') == 'Jakarta' ? 'selected' : '' }}>Jakarta</option>
-                                    <option value="Yogyakarta" {{ request('tujuan') == 'Yogyakarta' ? 'selected' : '' }}>Yogyakarta</option>
+                                    <option value="Jogja" {{ request('tujuan') == 'Jogja' ? 'selected' : '' }}>Jogja</option>
                                     <option value="Malang" {{ request('tujuan') == 'Malang' ? 'selected' : '' }}>Malang</option>
                                 </select>
                             </div>
