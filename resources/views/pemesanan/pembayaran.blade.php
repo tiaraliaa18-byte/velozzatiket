@@ -55,7 +55,7 @@
                         </div>
 
                         <div class="flex gap-3 mt-6">
-                            <a href="{{ route('pemesanan.penumpang') }}" class="flex-1 text-center py-2.5 rounded-xl border border-gray-300 text-gray-600 font-semibold hover:bg-gray-50 transition">
+                            <a href="{{ route('pemesanan.cari') }}" class="flex-1 text-center py-2.5 rounded-xl border border-gray-300 text-gray-600 font-semibold hover:bg-gray-50 transition" onclick="return confirm('Anda yakin ingin membatalkan pesanan?');">
                                 Kembali
                             </a>
                             <button type="submit"

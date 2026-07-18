@@ -29,11 +29,7 @@ Route::controller(AuthController::class)->group(function () {
 // 2. DASHBOARD PENUMPANG (Middleware Auth)
 Route::middleware(['auth'])->group(function () {
 
-    Route::get('/dashboard', function () {
-        return view('pemesanan.cari', [
-            'daftarJadwal' => \App\Models\Jadwal::all()
-        ]);
-    })->name('dashboard');
+    Route::get('/dashboard', [JadwalController::class, 'index'])->name('dashboard');
 
     // Alur Pemesanan
     Route::prefix('pemesanan')->name('pemesanan.')->group(function () {

@@ -190,7 +190,7 @@ class PemesananController extends Controller
         Pembayaran::create([
             'id_pemesanan'       => $pesanan->id_pemesanan,
             'metode_pembayaran'  => 'Transfer Bank',
-            'tanggal_pembayaran' => now(),
+            'tanggal_pembayaran' => now('Asia/Jakarta'),
             'bukti_pembayaran'   => $path,
         ]);
 
@@ -208,7 +208,7 @@ class PemesananController extends Controller
 
     public function unduhTiket($kode_booking)
     {
-        $pesanan = Pemesanan::with(['tiket.penumpang', 'jadwal'])
+        $pesanan = Pemesanan::with(['tiket.penumpang', 'jadwal','pembayaran'])
             ->where('kode_booking', $kode_booking)
             ->firstOrFail();
 

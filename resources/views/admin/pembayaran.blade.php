@@ -23,6 +23,7 @@
                             <th class="p-4 border-b-2 border-red-200">Detail Perjalanan</th>
                             <th class="p-4 border-b-2 border-red-200 text-center">No. Kursi</th>
                             <th class="p-4 border-b-2 border-red-200 text-center">Bukti Transfer</th>
+                            <th class="p-4 border-b-2 border-red-200">Waktu Bayar</th>
                             <th class="p-4 border-b-2 border-red-200 text-center">Status</th>
                         </tr>
                     </thead>
@@ -52,6 +53,15 @@
                                         <span class="text-gray-400 italic text-xs">Belum diupload</span>
                                     @endif
                                 </td>
+
+                                <td class="p-4 text-gray-600">
+                                    @if($pesanan->pembayaran->tanggal_pembayaran ?? null)
+                                        {{ \Carbon\Carbon::parse($pesanan->pembayaran->tanggal_pembayaran)->translatedFormat('d M Y, H:i') }}
+                                    @else
+                                        <span class="text-gray-400 italic">-</span>
+                                    @endif
+                                </td>
+
                                 <td class="p-4 text-center">
                                     <form action="{{ route('admin.pembayaran.update', $pesanan->pembayaran->id_pembayaran ?? 0) }}" method="POST" class="inline-flex items-center gap-2">
                                         @csrf

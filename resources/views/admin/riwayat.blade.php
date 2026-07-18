@@ -3,14 +3,29 @@
         // Siapkan data ringkas per booking untuk modal detail
         $riwayatData = [];
         foreach ($riwayat as $index => $pesanan) {
+            $jamBerangkat = '-';
+            $jamSampai = '-';
+            if ($pesanan->jadwal && $pesanan->jadwal->waktu_keberangkatan) {
+                $berangkat = \Carbon\Carbon::parse($pesanan->jadwal->waktu_keberangkatan);
+                $jamBerangkat = $berangkat->format('H:i');
+                $jamSampai = $berangkat->copy()->addMinutes($pesanan->jadwal->durasi ?? 0)->format('H:i');
+            }
+
+            $waktuBayar = $pesanan->pembayaran?->tanggal_pembayaran
+                ? \Carbon\Carbon::parse($pesanan->pembayaran->tanggal_pembayaran)->translatedFormat('d M Y, H:i')
+                : '-';
+
             $riwayatData[$index] = [
-                'kode_booking' => $pesanan->kode_booking ?? '-',
-                'kereta'       => $pesanan->jadwal->nama_kereta ?? '-',
-                'rute'         => ($pesanan->jadwal->asal ?? '-') . ' ➔ ' . ($pesanan->jadwal->tujuan ?? '-'),
-                'email'        => $pesanan->email_pemesan ?? '-',
-                'hp'           => $pesanan->hp_pemesan ?? '-',
-                'total_harga'  => 'Rp ' . number_format($pesanan->total_harga ?? 0, 0, ',', '.'),
-                'penumpang'    => $pesanan->tiket->map(function ($t) {
+                'kode_booking'  => $pesanan->kode_booking ?? '-',
+                'kereta'        => $pesanan->jadwal->nama_kereta ?? '-',
+                'rute'          => ($pesanan->jadwal->asal ?? '-') . ' ➔ ' . ($pesanan->jadwal->tujuan ?? '-'),
+                'email'         => $pesanan->email_pemesan ?? '-',
+                'hp'            => $pesanan->hp_pemesan ?? '-',
+                'total_harga'   => 'Rp ' . number_format($pesanan->total_harga ?? 0, 0, ',', '.'),
+                'jam_berangkat' => $jamBerangkat,
+                'jam_sampai'    => $jamSampai,
+                'waktu_bayar'   => $waktuBayar,
+                'penumpang'     => $pesanan->tiket->map(function ($t) {
                     $p = $t->penumpang;
                     return [
                         'nama'          => $p->nama_lengkap ?? '-',
@@ -188,6 +203,18 @@
                     <div>
                         <p class="text-xs text-gray-400 uppercase font-semibold">No. HP Pemesan</p>
                         <p>${data.hp}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-400 uppercase font-semibold">Jam Berangkat</p>
+                        <p class="font-semibold text-gray-800">${data.jam_berangkat}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-400 uppercase font-semibold">Jam Sampai</p>
+                        <p class="font-semibold text-gray-800">${data.jam_sampai}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-400 uppercase font-semibold">Waktu Pembayaran</p>
+                        <p class="font-semibold text-gray-800">${data.waktu_bayar}</p>
                     </div>
                 </div>
 
