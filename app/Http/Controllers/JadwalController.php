@@ -28,7 +28,7 @@ class JadwalController extends Controller
         // 1b. Kalau tanggal yang dicari HARI INI, sembunyikan jadwal yang jam keberangkatannya sudah lewat
         $tanggalDicari = $request->filled('tanggal') ? $request->tanggal : Carbon::today('Asia/Jakarta')->format('Y-m-d');  
 
-        if ($tanggalDicari === Carbon::today()->format('Y-m-d')) {
+       if ($tanggalDicari === Carbon::today('Asia/Jakarta')->format('Y-m-d')) {
             $sekarang = Carbon::now('Asia/Jakarta')->format('H:i:s');
 
             $daftarJadwal = $daftarJadwal->filter(function ($jadwal) use ($sekarang) {
