@@ -40,7 +40,7 @@ class PenumpangController extends Controller
         Pembayaran::create([
             'id_pemesanan'       => $request->id_pemesanan,
             'metode_pembayaran'  => 'Transfer Bank',
-            'tanggal_pembayaran' => now()->toDateString(), // Mengisi tanggal hari ini otomatis
+           'tanggal_pembayaran' => now(), // Mengisi tanggal & jam saat ini otomatis 
             'bukti_pembayaran'   => $namaFile ?? null,
         ]);
 
