@@ -46,6 +46,8 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('/sukses/{id}', [PemesananController::class, 'sukses'])->name('sukses');
         Route::get('/unduh-tiket/{kode_booking}', [PemesananController::class, 'unduhTiket'])->name('unduhTiket');
+        Route::get('/upload-ulang/{kode_booking}', [PemesananController::class, 'formUploadUlang'])->name('uploadUlang');
+        Route::post('/upload-ulang/{kode_booking}', [PemesananController::class, 'prosesUploadUlang'])->name('prosesUploadUlang');
     });
 });
 

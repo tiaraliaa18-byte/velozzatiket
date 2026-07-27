@@ -106,7 +106,7 @@ class PemesananController extends Controller
                 'kode_booking'          => $this->generateUniqueCode(),
                 'id_user'               => auth()->id(),
                 'id_jadwal'             => $id_jadwal,
-                'tanggal_keberangkatan' => session('tanggal'),   // ← tambah baris ini
+                'tanggal_keberangkatan' => session('tanggal'),
                 'total_harga'           => $total_harga,
                 'email_pemesan'         => $request->email_pemesan,
                 'hp_pemesan'            => $request->hp_pemesan,
@@ -149,8 +149,7 @@ class PemesananController extends Controller
     public function konfirmasi($id)
     {
         $pesanan = Pemesanan::with(['tiket.penumpang', 'jadwal'])->findOrFail($id);
- 
-        // Cek apakah pesanan sudah lewat batas waktu tapi belum dibayar
+
         if (
             $pesanan->status_pembayaran === 'pending' &&
             $pesanan->expired_at &&
@@ -159,18 +158,17 @@ class PemesananController extends Controller
             $pesanan->update(['status_pembayaran' => 'dibatalkan']);
             $pesanan->refresh();
         }
- 
-        // Kalau statusnya sudah dibatalkan (baru saja atau sebelumnya), tampilkan halaman kadaluarsa
+
         if ($pesanan->status_pembayaran === 'dibatalkan') {
             return view('pemesanan.kadaluarsa', compact('pesanan'));
         }
- 
+
         $sisaDetik = $pesanan->expired_at
             ? max((int) now()->diffInSeconds($pesanan->expired_at, false), 0)
             : 600;
- 
+
         $totalDetikBatas = 600;
- 
+
         return view('pemesanan.pembayaran', compact('pesanan', 'sisaDetik', 'totalDetikBatas'));
     }
 
@@ -215,6 +213,51 @@ class PemesananController extends Controller
         $pdf = \PDF::loadView('pemesanan.tiket-pdf', compact('pesanan'));
 
         return $pdf->download('e-tiket-' . $pesanan->kode_booking . '.pdf');
+    }
+
+    // Halaman form upload ulang bukti pembayaran (untuk pesanan yang ditolak)
+    public function formUploadUlang($kode_booking)
+    {
+        $pesanan = Pemesanan::with(['tiket.penumpang', 'jadwal'])
+            ->where('kode_booking', $kode_booking)
+            ->where('id_user', auth()->id())
+            ->firstOrFail();
+
+        if ($pesanan->status_pembayaran !== 'ditolak') {
+            return redirect()->route('pemesanan.sukses', $pesanan->id_pemesanan);
+        }
+
+        return view('pemesanan.upload-ulang', compact('pesanan'));
+    }
+
+    // Proses simpan bukti pembayaran baru, status balik jadi menunggu_konfirmasi
+    public function prosesUploadUlang(Request $request, $kode_booking)
+    {
+        $request->validate([
+            'bukti_pembayaran' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
+        ]);
+
+        $pesanan = Pemesanan::where('kode_booking', $kode_booking)
+            ->where('id_user', auth()->id())
+            ->firstOrFail();
+
+        if ($pesanan->status_pembayaran !== 'ditolak') {
+            return redirect()->route('pemesanan.sukses', $pesanan->id_pemesanan);
+        }
+
+        $path = $request->file('bukti_pembayaran')->store('bukti-pembayaran', 'public');
+
+        Pembayaran::create([
+            'id_pemesanan'       => $pesanan->id_pemesanan,
+            'metode_pembayaran'  => 'Transfer Bank',
+            'tanggal_pembayaran' => now('Asia/Jakarta'),
+            'bukti_pembayaran'   => $path,
+        ]);
+
+        $pesanan->update(['status_pembayaran' => 'menunggu_konfirmasi']);
+
+        return redirect()->route('pemesanan.sukses', $pesanan->id_pemesanan)
+            ->with('success', 'Bukti pembayaran baru berhasil dikirim. Mohon tunggu konfirmasi admin.');
     }
 
     private function generateUniqueCode()

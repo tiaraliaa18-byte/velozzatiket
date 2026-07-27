@@ -46,13 +46,19 @@
             </div>
 
             <div class="flex items-start gap-2 bg-red-50 text-red-700 text-sm rounded-xl px-4 py-3 mb-8 text-left">
-                <span>Bukti pembayaran Anda tidak dapat diverifikasi. Silakan hubungi customer service atau lakukan pemesanan ulang.</span>
+                <span>Bukti pembayaran Anda tidak dapat diverifikasi. Anda dapat mengunggah ulang bukti pembayaran untuk pesanan ini, atau melakukan pemesanan baru.</span>
             </div>
 
-            <a href="{{ route('pemesanan.cari') }}"
-               class="px-6 py-2.5 rounded-xl bg-primary text-white font-semibold hover:bg-primary-dark transition">
-                Pesan Lagi
-            </a>
+            <div class="flex items-center justify-center gap-3">
+                <a href="{{ route('pemesanan.uploadUlang', $pesanan->kode_booking) }}"
+                   class="px-6 py-2.5 rounded-xl bg-primary text-white font-semibold hover:bg-primary-dark transition">
+                    Unggah Ulang
+                </a>
+                <a href="{{ route('pemesanan.cari') }}"
+                   class="px-6 py-2.5 rounded-xl border border-gray-300 text-gray-600 font-semibold hover:bg-gray-50 transition">
+                    Pesan Lagi
+                </a>
+            </div>
 
         @else
 
